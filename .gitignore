@@ -1,0 +1,14 @@
+# Source config
+src/config.js
+
+# Build output
+build/
+
+# Dependencies
+node_modules/
+
+# Mac OS specific files
+.DS_Store
+
+# Environment variables
+.env 

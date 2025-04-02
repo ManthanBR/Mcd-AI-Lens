@@ -1,2 +1,2 @@
-# Mcd AI Lens
+# McdAI
  
