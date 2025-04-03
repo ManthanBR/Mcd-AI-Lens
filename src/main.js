@@ -49,7 +49,7 @@ import { Settings } from "./settings"
   })
   await session.setSource(source)
   source.setTransform(Transform2D.MirrorX)
-  await source.setRenderSize(window.innerWidth / 12, window.innerHeight / 12)
+  await source.setRenderSize(window.innerWidth, window.innerHeight)
   await session.setFPSLimit(Settings.camera.fps)
   await session.play()
 
