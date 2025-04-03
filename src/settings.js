@@ -6,7 +6,7 @@
 export const Settings = {
   // Camera settings
   camera: {
-    fps: 30,
+    fps: 20,
     constraints: {
       front: {
         video: {
