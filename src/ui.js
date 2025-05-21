@@ -53,7 +53,7 @@ export class UIManager {
           await navigator.share({
             files: [file],
             title: "The Ranveer Singh Meal",
-            text: "Check out this recording!",
+            text: "Check out The Ranveer Singh Meal",
           })
           console.log("File shared successfully")
         } else {
