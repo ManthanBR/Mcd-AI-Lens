@@ -48,7 +48,9 @@ import { Settings } from "./settings"
     disableSourceAudio: false,
   })
   await session.setSource(source)
+  if (!cameraManager.isBackFacing) {
   source.setTransform(Transform2D.MirrorX)
+}
   await source.setRenderSize(window.innerWidth, window.innerHeight)
   await session.setFPSLimit(Settings.camera.fps)
   await session.play()
