@@ -43,12 +43,14 @@ import { Settings } from "./settings"
 
   // Initialize camera and set up source
   const mediaStream = await cameraManager.initializeCamera()
-  const source = createMediaStreamSource(mediaStream, {
-    cameraType: "user",
-    disableSourceAudio: false,
-  })
+const source = createMediaStreamSource(mediaStream, {
+  cameraType: cameraManager.isBackFacing ? "environment" : "user",
+  disableSourceAudio: false,
+})
   await session.setSource(source)
+  if (!cameraManager.isBackFacing) {
   source.setTransform(Transform2D.MirrorX)
+}
   await source.setRenderSize(window.innerWidth, window.innerHeight)
   await session.setFPSLimit(Settings.camera.fps)
   await session.play()
