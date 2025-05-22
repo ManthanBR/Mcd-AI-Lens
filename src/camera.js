@@ -4,6 +4,7 @@ import { Settings } from "./settings"
 export class CameraManager {
   constructor() {
     this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+    this.isBackFacing = false
     this.mediaStream = null
   }
 
@@ -11,15 +12,42 @@ export class CameraManager {
     if (!this.isMobile) {
       document.body.classList.add("desktop")
     }
-    // Always get constraints for the default camera (back on mobile, user on desktop)
+
     this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
     return this.mediaStream
   }
 
-  // updateCamera method removed as switching is disabled
+  async updateCamera(session) {
+    this.isBackFacing = !this.isBackFacing
+
+    if (this.mediaStream) {
+      session.pause()
+      this.mediaStream.getTracks().forEach((track) => {
+        track.stop()
+      })
+      this.mediaStream = null
+    }
+
+    try {
+      this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
+      const source = createMediaStreamSource(this.mediaStream, {
+        cameraType: this.isBackFacing ? "environment" : "user",
+        disableSourceAudio: false,
+      })
+
+      await session.setSource(source)
+      if (!this.isBackFacing) {
+        source.setTransform(Transform2D.MirrorX)
+      }
+      await session.play()
+      return source
+    } catch (error) {
+      console.error("Failed to get media stream:", error)
+      throw error
+    }
+  }
 
   getConstraints() {
-    // Default to back camera on mobile, user (desktop) otherwise
-    return this.isMobile ? Settings.camera.constraints.back : Settings.camera.constraints.desktop
+    return this.isMobile ? (this.isBackFacing ? Settings.camera.constraints.back : Settings.camera.constraints.front) : Settings.camera.constraints.desktop
   }
 }

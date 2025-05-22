@@ -1,4 +1,10 @@
-
+/**
+ * Camera Kit Web Demo with Recording Feature
+ * Created by gowaaa (https://www.gowaaa.com)
+ * A creative technology studio specializing in AR experiences
+ *
+ * @copyright 2025 GOWAAA
+ */
 
 import { bootstrapCameraKit, createMediaStreamSource, Transform2D } from "@snap/camera-kit"
 import "./styles/index.v3.css"
@@ -38,13 +44,11 @@ import { Settings } from "./settings"
   // Initialize camera and set up source
   const mediaStream = await cameraManager.initializeCamera()
   const source = createMediaStreamSource(mediaStream, {
-    // Use 'environment' (back) if mobile, 'user' (front/default) otherwise
-    cameraType: cameraManager.isMobile ? "environment" : "user",
+    cameraType: "user",
     disableSourceAudio: false,
   })
   await session.setSource(source)
-  // No mirroring needed for the back camera (or default desktop)
-  // source.setTransform(Transform2D.MirrorX)
+  source.setTransform(Transform2D.MirrorX)
   await source.setRenderSize(window.innerWidth, window.innerHeight)
   await session.setFPSLimit(Settings.camera.fps)
   await session.play()
@@ -56,7 +60,6 @@ import { Settings } from "./settings"
   // Set up event listeners
   uiManager.recordButton.addEventListener("click", async () => {
     if (uiManager.recordPressedCount % 2 === 0) {
-      // Use the current camera's constraints for audio recording
       const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
       if (success) {
         uiManager.updateRecordButtonState(true)
@@ -81,14 +84,9 @@ import { Settings } from "./settings"
   document.getElementById("back-button").addEventListener("click", async () => {
     try {
       mediaRecorder.resetRecordingVariables()
-      // Need to ensure the UI state resets correctly without switch button logic
-      uiManager.actionButton.style.display = "none"
-      uiManager.backButtonContainer.style.display = "none"
-      uiManager.toggleRecordButton(true)
-      // Re-apply render size in case the window was resized while showing results
       uiManager.updateRenderSize(source, liveRenderTarget)
     } catch (error) {
-      console.error("Error resetting after recording:", error)
+      console.error("Error resetting camera:", error)
     }
   })
 
