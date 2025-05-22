@@ -4,7 +4,7 @@ import { Settings } from "./settings"
 export class CameraManager {
   constructor() {
     this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-    this.isBackFacing = true
+    this.isBackFacing = false
     this.mediaStream = null
   }
 

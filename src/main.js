@@ -43,14 +43,12 @@ import { Settings } from "./settings"
 
   // Initialize camera and set up source
   const mediaStream = await cameraManager.initializeCamera()
-const source = createMediaStreamSource(mediaStream, {
-  cameraType: cameraManager.isBackFacing ? "environment" : "user",
-  disableSourceAudio: false,
-})
+  const source = createMediaStreamSource(mediaStream, {
+    cameraType: "user",
+    disableSourceAudio: false,
+  })
   await session.setSource(source)
-  if (!cameraManager.isBackFacing) {
   source.setTransform(Transform2D.MirrorX)
-}
   await source.setRenderSize(window.innerWidth, window.innerHeight)
   await session.setFPSLimit(Settings.camera.fps)
   await session.play()
@@ -73,19 +71,14 @@ const source = createMediaStreamSource(mediaStream, {
     }
   })
 
-uiManager.switchButton.addEventListener("click", async () => {
-  const switchButton = uiManager.switchButton
-  switchButton.disabled = true
-  switchButton.style.display = "none"
-
-  try {
-    const source = await cameraManager.updateCamera(session)
-    uiManager.updateRenderSize(source, liveRenderTarget)
-    lens.setParameter('frontcamera', 1.0)
-  } catch (error) {
-    console.error("Error switching camera:", error)
-  }
-})
+  uiManager.switchButton.addEventListener("click", async () => {
+    try {
+      const source = await cameraManager.updateCamera(session)
+      uiManager.updateRenderSize(source, liveRenderTarget)
+    } catch (error) {
+      console.error("Error switching camera:", error)
+    }
+  })
 
   // Add back button handler
   document.getElementById("back-button").addEventListener("click", async () => {

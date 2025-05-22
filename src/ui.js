@@ -52,8 +52,8 @@ export class UIManager {
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({
             files: [file],
-            title: "The Ranveer Singh Meal",
-            text: "Check out The Ranveer Singh Meal",
+            title: "Recorded Video",
+            text: "Check out this recording!",
           })
           console.log("File shared successfully")
         } else {
@@ -64,16 +64,12 @@ export class UIManager {
       }
     }
 
-document.getElementById("back-button").onclick = async () => {
-  this.actionButton.style.display = "none"
-  this.backButtonContainer.style.display = "none"
-
-  // ✅ Restore switch button on back
-  this.switchButton.disabled = false
-  this.switchButton.style.display = "block"
-
-  this.toggleRecordButton(true)
-}
+    document.getElementById("back-button").onclick = async () => {
+      this.actionButton.style.display = "none"
+      this.backButtonContainer.style.display = "none"
+      this.switchButton.style.display = "block"
+      this.toggleRecordButton(true)
+    }
   }
 
   updateRenderSize(source, liveRenderTarget) {
