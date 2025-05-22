@@ -73,17 +73,22 @@ const source = createMediaStreamSource(mediaStream, {
     }
   })
 
-  uiManager.switchButton.addEventListener("click", async () => {
-    try {
-      const source = await cameraManager.updateCamera(session)
-      uiManager.updateRenderSize(source, liveRenderTarget)
-      // Example with JavaScript
-      lens.setParameter('frontcamera', 1.0); // send trigger value
+uiManager.switchButton.addEventListener("click", async () => {
+  const switchButton = uiManager.switchButton
+  switchButton.disabled = true
+  switchButton.style.display = "none" // Hides the button
 
-    } catch (error) {
-      console.error("Error switching camera:", error)
-    }
-  })
+  try {
+    const source = await cameraManager.updateCamera(session)
+    uiManager.updateRenderSize(source, liveRenderTarget)
+    lens.setParameter('frontcamera', 1.0) // send trigger value
+  } catch (error) {
+    console.error("Error switching camera:", error)
+    // Optional: Re-enable button if switching failed
+    switchButton.disabled = false
+    switchButton.style.display = "block"
+  }
+})
 
   // Add back button handler
   document.getElementById("back-button").addEventListener("click", async () => {
