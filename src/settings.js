@@ -33,7 +33,7 @@ export const Settings = {
   recording: {
     mimeType: "video/mp4",
     fps: 60,
-    outputFileName: "recording.mp4",
+    outputFileName: "RanveerSinghMeal.mp4",
   },
 
   // FFmpeg settings
