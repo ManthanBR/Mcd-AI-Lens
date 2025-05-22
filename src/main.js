@@ -68,7 +68,14 @@ import { Settings } from "./settings"
     }
   })
 
-  // Remove switch button event listener as the button is removed
+  uiManager.switchButton.addEventListener("click", async () => {
+    try {
+      const source = await cameraManager.updateCamera(session)
+      uiManager.updateRenderSize(source, liveRenderTarget)
+    } catch (error) {
+      console.error("Error switching camera:", error)
+    }
+  })
 
   // Add back button handler
   document.getElementById("back-button").addEventListener("click", async () => {

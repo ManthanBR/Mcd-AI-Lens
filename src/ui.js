@@ -5,7 +5,7 @@ export class UIManager {
     this.recordButton = document.getElementById("record-button")
     this.recordOutline = document.getElementById("outline")
     this.actionButton = document.getElementById("action-buttons")
-    // this.switchButton = document.getElementById("switch-button") // Button removed
+    this.switchButton = document.getElementById("switch-button") // Button removed
     this.loadingIcon = document.getElementById("loading")
     this.backButtonContainer = document.getElementById("back-button-container")
     this.recordPressedCount = 0
@@ -39,7 +39,7 @@ export class UIManager {
   displayPostRecordButtons(url, fixedBlob) {
     this.actionButton.style.display = "flex" // Use flex for layout if needed
     this.backButtonContainer.style.display = "block"
-    // this.switchButton.style.display = "none" // Button removed
+    this.switchButton.style.display = "none" // Button removed
 
     // Ensure handlers are fresh or properly managed if called multiple times
     const downloadButton = document.getElementById("download-button");
