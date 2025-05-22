@@ -76,17 +76,14 @@ const source = createMediaStreamSource(mediaStream, {
 uiManager.switchButton.addEventListener("click", async () => {
   const switchButton = uiManager.switchButton
   switchButton.disabled = true
-  switchButton.style.display = "none" // Hides the button
+  switchButton.style.display = "none"
 
   try {
     const source = await cameraManager.updateCamera(session)
     uiManager.updateRenderSize(source, liveRenderTarget)
-    lens.setParameter('frontcamera', 1.0) // send trigger value
+    lens.setParameter('frontcamera', 1.0)
   } catch (error) {
     console.error("Error switching camera:", error)
-    // Optional: Re-enable button if switching failed
-    switchButton.disabled = false
-    switchButton.style.display = "block"
   }
 })
 

@@ -64,12 +64,16 @@ export class UIManager {
       }
     }
 
-    document.getElementById("back-button").onclick = async () => {
-      this.actionButton.style.display = "none"
-      this.backButtonContainer.style.display = "none"
-      this.switchButton.style.display = "block"
-      this.toggleRecordButton(true)
-    }
+document.getElementById("back-button").onclick = async () => {
+  this.actionButton.style.display = "none"
+  this.backButtonContainer.style.display = "none"
+
+  // ✅ Restore switch button on back
+  this.switchButton.disabled = false
+  this.switchButton.style.display = "block"
+
+  this.toggleRecordButton(true)
+}
   }
 
   updateRenderSize(source, liveRenderTarget) {
