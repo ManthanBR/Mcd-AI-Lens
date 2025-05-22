@@ -77,6 +77,9 @@ const source = createMediaStreamSource(mediaStream, {
     try {
       const source = await cameraManager.updateCamera(session)
       uiManager.updateRenderSize(source, liveRenderTarget)
+      // Example with JavaScript
+      lens.setParameter('frontcamera', 1.0); // send trigger value
+
     } catch (error) {
       console.error("Error switching camera:", error)
     }
