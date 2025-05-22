@@ -12,20 +12,18 @@ export class UIManager {
   }
 
   toggleRecordButton(isVisible) {
-    this.recordOutline.style.display = isVisible ? "block" : "none"
-    this.recordButton.style.display = isVisible ? "block" : "none"
+    if (isVisible) {
+      this.recordOutline.style.display = "block"
+      this.recordButton.style.display = "block"
+    } else {
+      this.recordOutline.style.display = "none"
+      this.recordButton.style.display = "none"
+    }
   }
 
   updateRecordButtonState(isRecording) {
-    this.recordButton.style.backgroundImage = isRecording
-      ? `url('${Settings.ui.recordButton.stopImage}')`
-      : `url('${Settings.ui.recordButton.startImage}')`
+    this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
     this.recordPressedCount++
-  }
-
-  resetRecordButton() {
-    this.recordPressedCount = 0
-    this.updateRecordButtonState(false)
   }
 
   showLoading(show) {
@@ -71,7 +69,6 @@ export class UIManager {
       this.backButtonContainer.style.display = "none"
       this.switchButton.style.display = "block"
       this.toggleRecordButton(true)
-      this.resetRecordButton() // Reset recording state for next session
     }
   }
 
