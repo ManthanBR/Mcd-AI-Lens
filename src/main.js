@@ -73,24 +73,54 @@ const source = createMediaStreamSource(mediaStream, {
     }
   })
 
-  uiManager.switchButton.addEventListener("click", async () => {
-    try {
-      const source = await cameraManager.updateCamera(session)
-      uiManager.updateRenderSize(source, liveRenderTarget)
-    } catch (error) {
-      console.error("Error switching camera:", error)
+uiManager.switchButton.addEventListener("click", async () => {
+  try {
+    const newStream = await cameraManager.updateCamera(session)
+    const newSource = createMediaStreamSource(newStream, {
+      cameraType: cameraManager.isBackFacing ? "environment" : "user",
+      disableSourceAudio: false,
+    })
+
+    await session.setSource(newSource)
+    if (!cameraManager.isBackFacing) {
+      newSource.setTransform(Transform2D.MirrorX)
     }
-  })
+    await newSource.setRenderSize(window.innerWidth, window.innerHeight)
+
+    // 🔧 Update recorder with new source
+    mediaRecorder.updateStreamSource(newStream)
+
+    uiManager.updateRenderSize(newSource, liveRenderTarget)
+  } catch (error) {
+    console.error("Error switching camera:", error)
+  }
+})
 
   // Add back button handler
-  document.getElementById("back-button").addEventListener("click", async () => {
-    try {
-      mediaRecorder.resetRecordingVariables()
-      uiManager.updateRenderSize(source, liveRenderTarget)
-    } catch (error) {
-      console.error("Error resetting camera:", error)
+document.getElementById("back-button").addEventListener("click", async () => {
+  try {
+    mediaRecorder.resetRecordingVariables()
+
+    const stream = await cameraManager.initializeCamera()
+    const source = createMediaStreamSource(stream, {
+      cameraType: cameraManager.isBackFacing ? "environment" : "user",
+      disableSourceAudio: false,
+    })
+
+    await session.setSource(source)
+    if (!cameraManager.isBackFacing) {
+      source.setTransform(Transform2D.MirrorX)
     }
-  })
+    await source.setRenderSize(window.innerWidth, window.innerHeight)
+
+    // 🔧 Update recorder with new stream
+    mediaRecorder.updateStreamSource(stream)
+
+    uiManager.updateRenderSize(source, liveRenderTarget)
+  } catch (error) {
+    console.error("Error resetting camera:", error)
+  }
+})
 
   // Add window resize listener
   window.addEventListener("resize", () => uiManager.updateRenderSize(source, liveRenderTarget))

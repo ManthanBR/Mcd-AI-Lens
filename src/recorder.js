@@ -8,11 +8,12 @@ export class MediaRecorderManager {
     this.uiManager = uiManager
     this.audioVideoStream = null
     this.canvasStream = null
+    this.latestConstraints = null
   }
 
   async startRecording(liveRenderTarget, constraints) {
     try {
-      this.audioVideoStream = await navigator.mediaDevices.getUserMedia(constraints)
+      this.audioVideoStream = await navigator.mediaDevices.getUserMedia(this.latestConstraints || constraints)
       const audioTrack = this.audioVideoStream.getAudioTracks()[0]
       this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
       this.canvasStream.addTrack(audioTrack)
@@ -50,19 +51,14 @@ export class MediaRecorderManager {
   resetRecordingVariables() {
     this.mediaRecorder = null
     this.recordedChunks = []
-    // Stop all tracks in the audio/video stream
+
     if (this.audioVideoStream) {
-      this.audioVideoStream.getTracks().forEach((track) => {
-        track.stop()
-      })
+      this.audioVideoStream.getTracks().forEach((track) => track.stop())
       this.audioVideoStream = null
     }
 
-    // Stop all tracks in the canvas stream
     if (this.canvasStream) {
-      this.canvasStream.getTracks().forEach((track) => {
-        track.stop()
-      })
+      this.canvasStream.getTracks().forEach((track) => track.stop())
       this.canvasStream = null
     }
   }
@@ -71,5 +67,10 @@ export class MediaRecorderManager {
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
       this.mediaRecorder.stop()
     }
+  }
+
+  updateStreamSource(newConstraints) {
+    this.resetRecordingVariables()
+    this.latestConstraints = newConstraints
   }
 }
