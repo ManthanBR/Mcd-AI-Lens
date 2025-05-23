@@ -20,7 +20,7 @@ import { Settings } from "./settings"
   const groupID = process.env.GROUP_ID
 
   if (!apiToken || !lensID || !groupID) {
-    console.error("Missing required environment variables. Please check your environment settings.")
+    mobile.error("Missing required environment variables. Please check your environment settings.")
     return
   }
 
@@ -79,7 +79,7 @@ const source = createMediaStreamSource(mediaStream, {
       uiManager.updateRenderSize(source, liveRenderTarget)
       lens.setParameter('front', 1.0);
     } catch (error) {
-      console.error("Error switching camera:", error)
+      mobile.error("Error switching camera:", error)
     }
   })
 
@@ -89,7 +89,7 @@ const source = createMediaStreamSource(mediaStream, {
       mediaRecorder.resetRecordingVariables()
       uiManager.updateRenderSize(source, liveRenderTarget)
     } catch (error) {
-      console.error("Error resetting camera:", error)
+      mobile.error("Error resetting camera:", error)
     }
   })
 
@@ -98,4 +98,7 @@ const source = createMediaStreamSource(mediaStream, {
 
   // Update initial render size
   uiManager.updateRenderSize(source, liveRenderTarget)
+
+
+  
 })()

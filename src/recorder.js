@@ -23,14 +23,14 @@ export class MediaRecorderManager {
       this.recordedChunks = []
 
       this.mediaRecorder.ondataavailable = (event) => {
-        console.log("start record")
+        mobile.log("start record")
         if (event.data && event.data.size > 0) {
           this.recordedChunks.push(event.data)
         }
       }
 
       this.mediaRecorder.onstop = async () => {
-        console.log("stop record")
+        mobile.log("stop record")
         this.uiManager.showLoading(true)
         const blob = new Blob(this.recordedChunks, { type: Settings.recording.mimeType })
         const fixedBlob = await this.videoProcessor.fixVideoDuration(blob)
@@ -42,7 +42,7 @@ export class MediaRecorderManager {
       this.mediaRecorder.start()
       return true
     } catch (error) {
-      console.error("Error accessing media devices:", error)
+      mobile.error("Error accessing media devices:", error)
       return false
     }
   }
