@@ -12,39 +12,43 @@ export class MediaRecorderManager {
 
 async startRecording(liveRenderTarget, mediaStream) {
   try {
-    const audioTrack = mediaStream.getAudioTracks()[0]
+    const audioTrack = mediaStream.getAudioTracks().find((t) => t.kind === "audio")
+    if (!audioTrack) {
+      console.error("No audio track found in mediaStream")
+      return false
+    }
+
     this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
     this.canvasStream.addTrack(audioTrack)
 
     this.mediaRecorder = new MediaRecorder(this.canvasStream, {
       mimeType: Settings.recording.mimeType,
     })
-      this.recordedChunks = []
+    this.recordedChunks = []
 
-      this.mediaRecorder.ondataavailable = (event) => {
-        console.log("start record")
-        if (event.data && event.data.size > 0) {
-          this.recordedChunks.push(event.data)
-        }
+    this.mediaRecorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        this.recordedChunks.push(event.data)
       }
-
-      this.mediaRecorder.onstop = async () => {
-        console.log("stop record")
-        this.uiManager.showLoading(true)
-        const blob = new Blob(this.recordedChunks, { type: Settings.recording.mimeType })
-        const fixedBlob = await this.videoProcessor.fixVideoDuration(blob)
-        const url = URL.createObjectURL(fixedBlob)
-        this.uiManager.showLoading(false)
-        this.uiManager.displayPostRecordButtons(url, fixedBlob)
-      }
-
-      this.mediaRecorder.start()
-      return true
-    } catch (error) {
-      console.error("Error accessing media devices:", error)
-      return false
     }
+
+    this.mediaRecorder.onstop = async () => {
+      this.uiManager.showLoading(true)
+      const blob = new Blob(this.recordedChunks, { type: Settings.recording.mimeType })
+      const fixedBlob = await this.videoProcessor.fixVideoDuration(blob)
+      const url = URL.createObjectURL(fixedBlob)
+      this.uiManager.showLoading(false)
+      this.uiManager.displayPostRecordButtons(url, fixedBlob)
+    }
+
+    this.mediaRecorder.start()
+    return true
+  } catch (error) {
+    console.error("Error during recording:", error)
+    return false
   }
+}
+
 
   resetRecordingVariables() {
     this.mediaRecorder = null

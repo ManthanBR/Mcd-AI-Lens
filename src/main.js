@@ -73,6 +73,7 @@ uiManager.recordButton.addEventListener("click", async () => {
   }
 })
 
+
   uiManager.switchButton.addEventListener("click", async () => {
     try {
       const source = await cameraManager.updateCamera(session)
