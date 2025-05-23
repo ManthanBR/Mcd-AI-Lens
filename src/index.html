@@ -5,39 +5,41 @@
     <title>Mcd</title>
     <meta name="description" content="Camera Kit Template" />
     <meta name="robots" content="noindex" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no"> <!-- Added viewport for mobile -->
     <script type="module" src="/src/main.js"></script>
   </head>
 
   <body>
     <canvas id="canvas"></canvas>
     <div id="switch-cam">
-      <button id="switch-button" class="button-class"></button>
+      <button id="switch-button" class="button-class" aria-label="Switch Camera"></button>
     </div>
     <div class="poweredbysnap-logo">
-      <img id="image" src="../assets/Powered_bysnap.png" alt="Powered by Snap" />
+      <!-- Assuming assets folder is at the same level as index.html or handled by bundler -->
+      <img id="image" src="./assets/Powered_bysnap.png" alt="Powered by Snap" />
     </div>
     <div id="controls">
-      <img id="outline" src="../assets/RecordOutline.png" />
-      <button id="record-button" class="button-class"></button>
+      <img id="outline" src="./assets/RecordOutline.png" alt=""/> <!-- Alt can be empty if purely decorative -->
+      <button id="record-button" class="button-class" aria-label="Start Recording"></button>
     </div>
 
     <div id="action-buttons" style="display: none">
-      <button id="share-button" class="button-class">
-        <img id="shareImg" src="../assets/ShareButton.png" alt="share" />
+      <button id="share-button" class="button-class" aria-label="Share Video">
+        <img id="shareImg" src="./assets/ShareButton.png" alt="Share icon" />
       </button>
-      <button id="download-button" class="button-class">
-        <img id="downloadImg" src="../assets/DownloadButton.png" alt="download" />
+      <button id="download-button" class="button-class" aria-label="Download Video">
+        <img id="downloadImg" src="./assets/DownloadButton.png" alt="Download icon" />
       </button>
     </div>
 
     <div id="back-button-container" style="display: none">
-      <button id="back-button" class="button-class">
-        <img id="backImg" src="../assets/BackButton.png" alt="back" />
+      <button id="back-button" class="button-class" aria-label="Go Back">
+        <img id="backImg" src="./assets/BackButton.png" alt="Back icon" />
       </button>
     </div>
 
     <div id="loading">
-      <img id="loading-icon" src="../assets/LoadingIcon.png" alt="loading" />
+      <img id="loading-icon" src="./assets/LoadingIcon.png" alt="Loading animation" />
     </div>
   </body>
 </html>
