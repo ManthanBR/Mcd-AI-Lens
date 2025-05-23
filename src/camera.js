@@ -18,33 +18,41 @@ export class CameraManager {
   }
 
   async updateCamera(session) {
-    this.isBackFacing = !this.isBackFacing
+  this.isBackFacing = !this.isBackFacing
 
-if (this.mediaStream) {
-  session.pause()
-  // DO NOT stop mediaStream tracks to avoid disrupting the canvas stream
-  this.mediaStream = null
+  // Save old stream to stop later
+  const oldStream = this.mediaStream
+
+  // Get new stream first, before stopping the old one
+  try {
+    this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
+
+    const source = createMediaStreamSource(this.mediaStream, {
+      cameraType: this.isBackFacing ? "environment" : "user",
+      disableSourceAudio: false,
+    })
+
+    await session.pause()
+    await session.setSource(source)
+
+    if (!this.isBackFacing) {
+      source.setTransform(Transform2D.MirrorX)
+    }
+
+    await session.play()
+
+    // Stop old tracks after new session is running
+    if (oldStream) {
+      oldStream.getTracks().forEach((track) => track.stop())
+    }
+
+    return source
+  } catch (error) {
+    console.error("Failed to switch camera:", error)
+    throw error
+  }
 }
 
-
-    try {
-      this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
-      const source = createMediaStreamSource(this.mediaStream, {
-        cameraType: this.isBackFacing ? "environment" : "user",
-        disableSourceAudio: false,
-      })
-
-      await session.setSource(source)
-      if (!this.isBackFacing) {
-        source.setTransform(Transform2D.MirrorX)
-      }
-      await session.play()
-      return source
-    } catch (error) {
-      console.error("Failed to get media stream:", error)
-      throw error
-    }
-  }
 
   getConstraints() {
     return this.isMobile ? (this.isBackFacing ? Settings.camera.constraints.back : Settings.camera.constraints.front) : Settings.camera.constraints.desktop
