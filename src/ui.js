@@ -1,3 +1,5 @@
+import { Settings } from "./settings"
+
 export class UIManager {
   constructor() {
     this.recordButton = document.getElementById("record-button")
@@ -20,9 +22,7 @@ export class UIManager {
   }
 
   updateRecordButtonState(isRecording) {
-    this.recordButton.style.backgroundImage = isRecording
-      ? `url('${Settings.ui.recordButton.stopImage}')`
-      : `url('${Settings.ui.recordButton.startImage}')`
+    this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
     this.recordPressedCount++
   }
 
@@ -57,7 +57,7 @@ export class UIManager {
           })
           console.log("File shared successfully")
         } else {
-          alert("Sharing not supported on this device.")
+          console.error("Sharing files is not supported on this device.")
         }
       } catch (error) {
         console.error("Error while sharing:", error)
