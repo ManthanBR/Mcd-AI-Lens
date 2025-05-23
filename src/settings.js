@@ -12,47 +12,45 @@ export const Settings = {
         video: {
           facingMode: { exact: "user" },
         },
-        audio: true, // Request audio for the main camera stream
+        audio: true,
       },
       back: {
         video: {
           facingMode: { exact: "environment" },
         },
-        audio: true, // Request audio for the main camera stream
+        audio: true,
       },
       desktop: {
         video: {
-          facingMode: "user", // On desktop, 'exact' might be too restrictive
+          facingMode: "user",
         },
-        audio: true, // Request audio for the main camera stream
+        audio: true,
       },
     },
   },
 
   // Recording settings
   recording: {
-    mimeType: "video/mp4", // "video/webm; codecs=vp9" or "video/mp4"
-    fps: 30, // Canvas captureStream fps
+    mimeType: "video/mp4",
+    fps: 60,
     outputFileName: "recording.mp4",
   },
 
   // FFmpeg settings
   ffmpeg: {
-    baseURL: "/ffmpeg", // Assumes ffmpeg files are served from a '/ffmpeg' directory at the root of your web server. Adjust if needed.
+    baseURL: "/ffmpeg",
     coreURL: "ffmpeg-core.js",
     wasmURL: "ffmpeg-core.wasm",
-    // If using @ffmpeg/core-mt, a workerURL might also be needed:
-    // workerURL: `${baseURL}/ffmpeg-core.worker.js`,
     outputOptions: ["-movflags", "faststart", "-c", "copy"],
   },
 
   // UI settings
   ui: {
     recordButton: {
-      startImage: "./assets/RecordButton.png", // Relative to HTML document
-      stopImage: "./assets/RecordStop.png",   // Relative to HTML document
+      startImage: "./assets/RecordButton.png",
+      stopImage: "./assets/RecordStop.png",
     },
-    assets: { // These paths are relative to the HTML document
+    assets: {
       poweredBySnap: "./assets/Powered_bysnap.png",
       recordOutline: "./assets/RecordOutline.png",
       shareButton: "./assets/ShareButton.png",
