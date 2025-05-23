@@ -22,9 +22,10 @@ export class CameraManager {
 
     if (this.mediaStream) {
       session.pause()
-      this.mediaStream.getTracks().forEach((track) => {
-        track.stop()
-      })
+this.mediaStream.getVideoTracks().forEach((track) => {
+  track.stop()
+})
+
       this.mediaStream = null
     }
 
