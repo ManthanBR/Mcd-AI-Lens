@@ -64,11 +64,12 @@ export class UIManager {
       }
     }
 
-    document.getElementById("back-button").onclick = async () => {
-      this.actionButton.style.display = "none"
-      this.backButtonContainer.style.display = "none"
-      this.switchButton.style.display = "block"
-      this.toggleRecordButton(true)
+document.getElementById("back-button").onclick = async () => {
+      console.log("UIManager back-button.onclick fired.");
+      this.actionButton.style.display = "none";
+      this.backButtonContainer.style.display = "none";
+      this.switchButton.style.display = "block";
+      this.toggleRecordButton(true);
     }
   }
 
