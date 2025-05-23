@@ -60,18 +60,18 @@ const source = createMediaStreamSource(mediaStream, {
   await session.applyLens(lens)
 
   // Set up event listeners
-  uiManager.recordButton.addEventListener("click", async () => {
-    if (uiManager.recordPressedCount % 2 === 0) {
-      const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
-      if (success) {
-        uiManager.updateRecordButtonState(true)
-      }
-    } else {
-      uiManager.updateRecordButtonState(false)
-      uiManager.toggleRecordButton(false)
-      mediaRecorder.stopRecording()
+uiManager.recordButton.addEventListener("click", async () => {
+  if (uiManager.recordPressedCount % 2 === 0) {
+    const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.mediaStream)
+    if (success) {
+      uiManager.updateRecordButtonState(true)
     }
-  })
+  } else {
+    uiManager.updateRecordButtonState(false)
+    uiManager.toggleRecordButton(false)
+    mediaRecorder.stopRecording()
+  }
+})
 
   uiManager.switchButton.addEventListener("click", async () => {
     try {

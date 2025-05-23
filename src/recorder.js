@@ -10,16 +10,15 @@ export class MediaRecorderManager {
     this.canvasStream = null
   }
 
-  async startRecording(liveRenderTarget, constraints) {
-    try {
-      this.audioVideoStream = await navigator.mediaDevices.getUserMedia(constraints)
-      const audioTrack = this.audioVideoStream.getAudioTracks()[0]
-      this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
-      this.canvasStream.addTrack(audioTrack)
+async startRecording(liveRenderTarget, mediaStream) {
+  try {
+    const audioTrack = mediaStream.getAudioTracks()[0]
+    this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
+    this.canvasStream.addTrack(audioTrack)
 
-      this.mediaRecorder = new MediaRecorder(this.canvasStream, {
-        mimeType: Settings.recording.mimeType,
-      })
+    this.mediaRecorder = new MediaRecorder(this.canvasStream, {
+      mimeType: Settings.recording.mimeType,
+    })
       this.recordedChunks = []
 
       this.mediaRecorder.ondataavailable = (event) => {
