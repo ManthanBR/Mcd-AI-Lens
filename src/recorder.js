@@ -14,11 +14,8 @@ export class MediaRecorderManager {
   async startRecording(liveRenderTarget) {
     try {
       // Get only audio — we'll record video from the canvas
-      this.audioVideoStream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const audioTrack = this.audioVideoStream.getAudioTracks()[0]
+this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
 
-      this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
-      this.canvasStream.addTrack(audioTrack)
 
       this.mediaRecorder = new MediaRecorder(this.canvasStream, {
         mimeType: Settings.recording.mimeType,
