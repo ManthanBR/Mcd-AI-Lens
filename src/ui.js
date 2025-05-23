@@ -1,4 +1,3 @@
-// ui.js
 import { Settings } from "./settings"
 
 export class UIManager {
@@ -9,20 +8,7 @@ export class UIManager {
     this.switchButton = document.getElementById("switch-button")
     this.loadingIcon = document.getElementById("loading")
     this.backButtonContainer = document.getElementById("back-button-container")
-    this.backButton = document.getElementById("back-button") // Get the button itself
     this.recordPressedCount = 0
-
-    // Dependencies to be set by main.js
-    this.mediaRecorder = null
-    this.getCurrentCameraKitSource = null
-    this.liveRenderTarget = null
-  }
-
-  // Method to set dependencies from main.js
-  setDependencies(mediaRecorder, getCurrentCameraKitSource, liveRenderTarget) {
-    this.mediaRecorder = mediaRecorder
-    this.getCurrentCameraKitSource = getCurrentCameraKitSource
-    this.liveRenderTarget = liveRenderTarget
   }
 
   toggleRecordButton(isVisible) {
@@ -37,11 +23,7 @@ export class UIManager {
 
   updateRecordButtonState(isRecording) {
     this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
-    if (!isRecording && this.recordPressedCount % 2 !== 0) { // If stopping
-        this.recordPressedCount++; // Ensure count is even after stop
-    } else if (isRecording) {
-        this.recordPressedCount++; // Increment for start
-    }
+    this.recordPressedCount++
   }
 
   showLoading(show) {
@@ -52,7 +34,6 @@ export class UIManager {
     this.actionButton.style.display = "block"
     this.backButtonContainer.style.display = "block"
     this.switchButton.style.display = "none"
-    this.toggleRecordButton(false) // Hide record button
 
     document.getElementById("download-button").onclick = () => {
       const a = document.createElement("a")
@@ -60,7 +41,6 @@ export class UIManager {
       a.download = Settings.recording.outputFileName
       a.click()
       a.remove()
-      URL.revokeObjectURL(url); // Clean up object URL after download
     }
 
     document.getElementById("share-button").onclick = async () => {
@@ -78,58 +58,26 @@ export class UIManager {
           console.log("File shared successfully")
         } else {
           console.error("Sharing files is not supported on this device.")
-          alert("Sharing not supported on this device. Try downloading.")
         }
       } catch (error) {
         console.error("Error while sharing:", error)
-        alert("Error sharing file.")
       }
     }
 
-    // Centralized back button logic
-    this.backButton.onclick = async () => {
-      console.log("UIManager: Back button clicked from post-record screen.");
+    document.getElementById("back-button").onclick = async () => {
       this.actionButton.style.display = "none"
       this.backButtonContainer.style.display = "none"
       this.switchButton.style.display = "block"
       this.toggleRecordButton(true)
-      this.updateRecordButtonState(false); // Ensure record button shows record icon
-
-      // Clean up recording resources and update render size
-      if (this.mediaRecorder) {
-        this.mediaRecorder.resetRecordingVariables()
-      }
-      if (this.getCurrentCameraKitSource && this.liveRenderTarget) {
-        const source = this.getCurrentCameraKitSource()
-        if (source) {
-            this.updateRenderSize(source, this.liveRenderTarget) // Call the corrected updateRenderSize
-        } else {
-            console.warn("Could not get current camera kit source for resize on back button press.")
-        }
-      }
-      URL.revokeObjectURL(url); // Clean up object URL when going back
     }
   }
 
   updateRenderSize(source, liveRenderTarget) {
-    if (!source || !liveRenderTarget) {
-        console.warn("updateRenderSize called with null source or liveRenderTarget");
-        return;
-    }
     const width = window.innerWidth
     const height = window.innerHeight
 
-    // Set the CSS display size of the canvas
     liveRenderTarget.style.width = `${width}px`
     liveRenderTarget.style.height = `${height}px`
-
-    // --- REMOVE THESE LINES ---
-    // liveRenderTarget.width = width;
-    // liveRenderTarget.height = height;
-    // --- END REMOVE ---
-
-    // Set the rendering resolution via Camera Kit API
     source.setRenderSize(width, height)
-    console.log(`Camera Kit render size updated to: ${width}x${height} via source.setRenderSize. CSS display size also set.`);
   }
 }
