@@ -1,3 +1,4 @@
+// recorder.js
 import { Settings } from "./settings"
 
 export class MediaRecorderManager {
@@ -10,27 +11,28 @@ export class MediaRecorderManager {
     this.canvasStream = null
   }
 
-  async startRecording(liveRenderTarget, constraints) {
+  async startRecording(liveRenderTarget) {
     try {
-      this.audioVideoStream = await navigator.mediaDevices.getUserMedia(constraints)
+      // Get only audio — we'll record video from the canvas
+      this.audioVideoStream = await navigator.mediaDevices.getUserMedia({ audio: true })
       const audioTrack = this.audioVideoStream.getAudioTracks()[0]
+
       this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
       this.canvasStream.addTrack(audioTrack)
 
       this.mediaRecorder = new MediaRecorder(this.canvasStream, {
         mimeType: Settings.recording.mimeType,
       })
+
       this.recordedChunks = []
 
       this.mediaRecorder.ondataavailable = (event) => {
-        console.log("start record")
         if (event.data && event.data.size > 0) {
           this.recordedChunks.push(event.data)
         }
       }
 
       this.mediaRecorder.onstop = async () => {
-        console.log("stop record")
         this.uiManager.showLoading(true)
         const blob = new Blob(this.recordedChunks, { type: Settings.recording.mimeType })
         const fixedBlob = await this.videoProcessor.fixVideoDuration(blob)
@@ -42,34 +44,30 @@ export class MediaRecorderManager {
       this.mediaRecorder.start()
       return true
     } catch (error) {
-      console.error("Error accessing media devices:", error)
+      console.error("Error starting recording:", error)
       return false
-    }
-  }
-
-  resetRecordingVariables() {
-    this.mediaRecorder = null
-    this.recordedChunks = []
-    // Stop all tracks in the audio/video stream
-    if (this.audioVideoStream) {
-      this.audioVideoStream.getTracks().forEach((track) => {
-        track.stop()
-      })
-      this.audioVideoStream = null
-    }
-
-    // Stop all tracks in the canvas stream
-    if (this.canvasStream) {
-      this.canvasStream.getTracks().forEach((track) => {
-        track.stop()
-      })
-      this.canvasStream = null
     }
   }
 
   stopRecording() {
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
       this.mediaRecorder.stop()
+    }
+  }
+
+  resetRecordingVariables() {
+    this.mediaRecorder = null
+    this.recordedChunks = []
+
+    if (this.canvasStream) {
+      this.canvasStream.getTracks().forEach((track) => track.stop())
+      this.canvasStream = null
+    }
+
+    // Only stop audio when needed (e.g. final cleanup)
+    if (this.audioVideoStream) {
+      this.audioVideoStream.getTracks().forEach((track) => track.stop())
+      this.audioVideoStream = null
     }
   }
 }

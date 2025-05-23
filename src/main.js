@@ -62,7 +62,7 @@ const source = createMediaStreamSource(mediaStream, {
   // Set up event listeners
   uiManager.recordButton.addEventListener("click", async () => {
     if (uiManager.recordPressedCount % 2 === 0) {
-      const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
+      const success = await mediaRecorder.startRecording(liveRenderTarget)
       if (success) {
         uiManager.updateRecordButtonState(true)
       }
@@ -77,6 +77,7 @@ const source = createMediaStreamSource(mediaStream, {
     try {
       const source = await cameraManager.updateCamera(session)
       uiManager.updateRenderSize(source, liveRenderTarget)
+      lens.setParameter('front', 1.0);
     } catch (error) {
       console.error("Error switching camera:", error)
     }
