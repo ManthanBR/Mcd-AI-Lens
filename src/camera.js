@@ -20,11 +20,12 @@ export class CameraManager {
   async updateCamera(session) {
     this.isBackFacing = !this.isBackFacing
 
-    if (this.mediaStream) {
-      session.pause()
-this.mediaStream.getVideoTracks().forEach((track) => {
-  track.stop()
-})
+if (this.mediaStream) {
+  session.pause()
+  // DO NOT stop mediaStream tracks to avoid disrupting the canvas stream
+  this.mediaStream = null
+}
+
 
       this.mediaStream = null
     }
