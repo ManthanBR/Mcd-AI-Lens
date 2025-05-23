@@ -42,7 +42,7 @@ export class CameraManager {
       await session.play()
       return source
     } catch (error) {
-      mobile.error("Failed to get media stream:", error)
+      console.error("Failed to get media stream:", error)
       throw error
     }
   }
