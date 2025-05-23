@@ -27,9 +27,6 @@ if (this.mediaStream) {
 }
 
 
-      this.mediaStream = null
-    }
-
     try {
       this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
       const source = createMediaStreamSource(this.mediaStream, {
