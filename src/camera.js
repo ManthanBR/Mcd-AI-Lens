@@ -29,7 +29,21 @@ export class CameraManager {
     }
 
     try {
-      this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
+      let stream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
+
+      // Ensure audio track is present — retry audio-only if missing
+      if (stream.getAudioTracks().length === 0) {
+        try {
+          const audioOnly = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+          audioOnly.getAudioTracks().forEach(track => stream.addTrack(track))
+          console.warn("Audio was missing — added audio track manually after switch.")
+        } catch (err) {
+          console.error("Failed to re-acquire audio after switch:", err)
+        }
+      }
+
+      this.mediaStream = stream
+
       const source = createMediaStreamSource(this.mediaStream, {
         cameraType: this.isBackFacing ? "environment" : "user",
         disableSourceAudio: false,
@@ -39,6 +53,7 @@ export class CameraManager {
       if (!this.isBackFacing) {
         source.setTransform(Transform2D.MirrorX)
       }
+
       await session.play()
       return source
     } catch (error) {
@@ -48,6 +63,8 @@ export class CameraManager {
   }
 
   getConstraints() {
-    return this.isMobile ? (this.isBackFacing ? Settings.camera.constraints.back : Settings.camera.constraints.front) : Settings.camera.constraints.desktop
+    return this.isMobile
+      ? (this.isBackFacing ? Settings.camera.constraints.back : Settings.camera.constraints.front)
+      : Settings.camera.constraints.desktop
   }
 }

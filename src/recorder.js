@@ -18,7 +18,7 @@ export class MediaRecorderManager {
 
       const audioTrack = mediaStream.getAudioTracks().find((t) => t.kind === "audio")
       if (!audioTrack) {
-        console.error("No audio track found in media stream")
+        console.error("No audio track found — cannot start recording with audio.")
         return false
       }
 
