@@ -42,10 +42,6 @@ export class UIManager {
     } else if (isRecording) {
         this.recordPressedCount++; // Increment for start
     }
-    // If state is set to 'not recording' (e.g. from an error), ensure count is even
-    if (!isRecording && this.recordPressedCount % 2 !== 0) {
-        // this.recordPressedCount = 0; // Or some logic to make it even
-    }
   }
 
   showLoading(show) {
@@ -106,7 +102,7 @@ export class UIManager {
       if (this.getCurrentCameraKitSource && this.liveRenderTarget) {
         const source = this.getCurrentCameraKitSource()
         if (source) {
-            this.updateRenderSize(source, this.liveRenderTarget)
+            this.updateRenderSize(source, this.liveRenderTarget) // Call the corrected updateRenderSize
         } else {
             console.warn("Could not get current camera kit source for resize on back button press.")
         }
@@ -123,11 +119,17 @@ export class UIManager {
     const width = window.innerWidth
     const height = window.innerHeight
 
+    // Set the CSS display size of the canvas
     liveRenderTarget.style.width = `${width}px`
     liveRenderTarget.style.height = `${height}px`
-    liveRenderTarget.width = width; // Also set canvas internal resolution
-    liveRenderTarget.height = height;
+
+    // --- REMOVE THESE LINES ---
+    // liveRenderTarget.width = width;
+    // liveRenderTarget.height = height;
+    // --- END REMOVE ---
+
+    // Set the rendering resolution via Camera Kit API
     source.setRenderSize(width, height)
-    console.log(`Render size updated to: ${width}x${height}`);
+    console.log(`Camera Kit render size updated to: ${width}x${height} via source.setRenderSize. CSS display size also set.`);
   }
 }
