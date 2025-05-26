@@ -78,7 +78,6 @@ export class UIManager {
 
     liveRenderTarget.style.width = `${width}px`
     liveRenderTarget.style.height = `${height}px`
-    source.setRenderSize(width * window.devicePixelRatio, height * window.devicePixelRatio)
-
+    source.setRenderSize(width, height)
   }
 }

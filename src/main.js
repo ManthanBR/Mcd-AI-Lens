@@ -51,10 +51,7 @@ const source = createMediaStreamSource(mediaStream, {
   if (!cameraManager.isBackFacing) {
   source.setTransform(Transform2D.MirrorX)
 }
-  await source.setRenderSize(
-  window.innerWidth * window.devicePixelRatio,
-  window.innerHeight * window.devicePixelRatio
-)
+  await source.setRenderSize(window.innerWidth, window.innerHeight)
   await session.setFPSLimit(Settings.camera.fps)
   await session.play()
 
