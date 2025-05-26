@@ -74,7 +74,7 @@ export class UIManager {
 
   updateRenderSize(source, liveRenderTarget) {
     const width = window.innerWidth
-    const height = 1920
+    const height = window.innerHeight
 
     liveRenderTarget.style.width = `${width}px`
     liveRenderTarget.style.height = `${height}px`
