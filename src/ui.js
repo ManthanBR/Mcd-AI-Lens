@@ -9,6 +9,13 @@ export class UIManager {
     this.loadingIcon = document.getElementById("loading")
     this.backButtonContainer = document.getElementById("back-button-container")
     this.recordPressedCount = 0
+
+    // Photo capture elements
+    this.previewContainer = document.getElementById("photo-preview")
+    this.previewImage = document.getElementById("preview-img")
+    this.sharePhotoButton = document.getElementById("share-photo-button")
+    this.closePreviewButton = document.getElementById("close-preview-button")
+    this.flashOverlay = document.getElementById("flash-overlay")
   }
 
   toggleRecordButton(isVisible) {
@@ -22,7 +29,9 @@ export class UIManager {
   }
 
   updateRecordButtonState(isRecording) {
-    this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
+    this.recordButton.style.backgroundImage = isRecording
+      ? `url('${Settings.ui.recordButton.stopImage}')`
+      : `url('${Settings.ui.recordButton.startImage}')`
     this.recordPressedCount++
   }
 
@@ -79,5 +88,22 @@ export class UIManager {
     liveRenderTarget.style.width = `${width}px`
     liveRenderTarget.style.height = `${height}px`
     source.setRenderSize(width, height)
+  }
+
+  // New methods
+  showPhotoPreview(imageDataURL) {
+    this.previewImage.src = imageDataURL
+    this.previewContainer.style.display = "flex"
+  }
+
+  hidePhotoPreview() {
+    this.previewContainer.style.display = "none"
+  }
+
+  flashEffect() {
+    this.flashOverlay.style.display = "block"
+    setTimeout(() => {
+      this.flashOverlay.style.display = "none"
+    }, 200)
   }
 }
