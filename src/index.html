@@ -5,82 +5,17 @@
     <title>Mcd</title>
     <meta name="description" content="Camera Kit Template" />
     <meta name="robots" content="noindex" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script type="module" src="/src/main.js"></script>
-    <style>
-      #photo-preview {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: black;
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        z-index: 1000;
-      }
-
-      #preview-img {
-        max-width: 90%;
-        max-height: 80%;
-        border-radius: 10px;
-      }
-
-      #photo-actions {
-        margin-top: 20px;
-        display: flex;
-        gap: 10px;
-      }
-
-      #flash-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background: white;
-        opacity: 0.8;
-        z-index: 999;
-        display: none;
-        animation: flash 0.2s ease-in-out;
-      }
-
-      @keyframes flash {
-        0% {
-          opacity: 0.8;
-        }
-        100% {
-          opacity: 0;
-        }
-      }
-    </style>
   </head>
 
   <body>
     <canvas id="canvas"></canvas>
-
-    <!-- Flash effect overlay -->
-    <div id="flash-overlay"></div>
-
-    <!-- Photo preview -->
-    <div id="photo-preview">
-      <img id="preview-img" src="" alt="Captured Photo" />
-      <div id="photo-actions">
-        <button id="share-photo-button">Share</button>
-        <button id="close-preview-button">Close</button>
-      </div>
-    </div>
-
     <div id="switch-cam">
       <button id="switch-button" class="button-class"></button>
     </div>
-
     <div class="poweredbysnap-logo">
       <img id="image" src="../assets/Powered_bysnap.png" alt="Powered by Snap" />
     </div>
-
     <div id="controls">
       <img id="outline" src="../assets/RecordOutline.png" />
       <button id="record-button" class="button-class"></button>
