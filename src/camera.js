@@ -32,7 +32,7 @@ export class CameraManager {
       this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
       const source = createMediaStreamSource(this.mediaStream, {
         cameraType: this.isBackFacing ? "environment" : "user",
-        disableSourceAudio: true,
+        disableSourceAudio: false,
       })
 
       await session.setSource(source)
