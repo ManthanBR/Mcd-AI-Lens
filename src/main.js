@@ -77,6 +77,7 @@ const source = createMediaStreamSource(mediaStream, {
     try {
       const source = await cameraManager.updateCamera(session)
       uiManager.updateRenderSize(source, liveRenderTarget)
+      await session.sendBehaviorEvent("onSwitchCamera")
     } catch (error) {
       console.error("Error switching camera:", error)
     }
