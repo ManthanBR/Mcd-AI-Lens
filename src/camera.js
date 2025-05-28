@@ -6,6 +6,7 @@ export class CameraManager {
     this.isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
     this.isBackFacing = true
     this.mediaStream = null
+    this.currentSource = null // To store the current Camera Kit source
   }
 
   async initializeCamera() {
@@ -32,8 +33,9 @@ export class CameraManager {
       this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
       const source = createMediaStreamSource(this.mediaStream, {
         cameraType: this.isBackFacing ? "environment" : "user",
-        disableSourceAudio: false,
+        disableSourceAudio: false, // Ensure audio is not disabled for the source
       })
+      this.currentSource = source // Update current source
 
       await session.setSource(source)
       if (!this.isBackFacing) {
@@ -49,5 +51,9 @@ export class CameraManager {
 
   getConstraints() {
     return this.isMobile ? (this.isBackFacing ? Settings.camera.constraints.back : Settings.camera.constraints.front) : Settings.camera.constraints.desktop
+  }
+
+  getSource() {
+    return this.currentSource
   }
 }
