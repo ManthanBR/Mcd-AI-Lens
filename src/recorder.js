@@ -1,16 +1,17 @@
 import { Settings } from "./settings"
 
 export class MediaRecorderManager {
-  constructor(videoProcessor, uiManager, cameraManager) {
+  constructor(videoProcessor, uiManager, cameraManager) { // Added cameraManager
     this.mediaRecorder = null
     this.recordedChunks = []
     this.videoProcessor = videoProcessor
     this.uiManager = uiManager
-    this.cameraManager = cameraManager;
+    this.cameraManager = cameraManager; // Store cameraManager instance
     this.canvasStream = null
+    // this.audioVideoStream = null; // This is no longer needed as we use cameraManager's stream
   }
 
-  async startRecording(liveRenderTarget, cameraManagerInstance) {
+  async startRecording(liveRenderTarget, cameraManagerInstance) { // Takes cameraManager instance
     try {
       if (!cameraManagerInstance || !cameraManagerInstance.mediaStream) {
         console.error("CameraManager instance or its mediaStream is not available for recording.")
@@ -22,16 +23,14 @@ export class MediaRecorderManager {
       const audioTracks = cameraManagerInstance.mediaStream.getAudioTracks()
       if (audioTracks.length === 0) {
         console.error("No audio track found in CameraManager's current mediaStream.")
-        // Consider if user should be alerted or if recording should proceed without audio
-        // For now, let's assume audio is desired.
-        this.uiManager.showLoading(false);
-        alert("Microphone access is required for recording audio. Please check permissions.");
-        return false;
+        this.uiManager.showLoading(false)
+        alert("Microphone not accessible. Cannot start recording with audio.")
+        return false // Or proceed with video-only recording if desired
       }
       const audioTrack = audioTracks[0]
 
       this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
-      this.canvasStream.addTrack(audioTrack.clone())
+      this.canvasStream.addTrack(audioTrack.clone()) // Clone the track
 
       this.mediaRecorder = new MediaRecorder(this.canvasStream, {
         mimeType: Settings.recording.mimeType,
@@ -51,31 +50,28 @@ export class MediaRecorderManager {
         const blob = new Blob(this.recordedChunks, { type: Settings.recording.mimeType })
         
         let finalBlob = blob;
-        if (this.recordedChunks.length > 0) {
+        if (this.recordedChunks.length > 0) { // only process if there's data
             try {
                 const fixedBlob = await this.videoProcessor.fixVideoDuration(blob)
                 finalBlob = fixedBlob;
             } catch (ffmpegError) {
                 console.error("FFmpeg processing failed:", ffmpegError);
-                // Fallback to using the original blob if ffmpeg fails or inform user
-                alert("Video processing failed. The raw recording will be used.");
+                // Fallback to using the original blob if ffmpeg fails
             }
         } else {
             console.warn("No data recorded.");
             this.uiManager.showLoading(false);
-            this.uiManager.toggleRecordButton(true);
-            this.uiManager.recordPressedCount = 0; // Reset count
+            this.uiManager.toggleRecordButton(true); // Show record button again
             // Potentially inform user that recording was empty
-            this.resetRecordingVariables(); // Still reset even if empty
+            this.resetRecordingVariables();
             return;
         }
         
         const url = URL.createObjectURL(finalBlob)
         this.uiManager.showLoading(false)
+        // Pass `this` (MediaRecorderManager instance) and `this.cameraManager`
         this.uiManager.displayPostRecordButtons(url, finalBlob, this, this.cameraManager)
-        // resetRecordingVariables() is called within displayPostRecordButtons' back button,
-        // or if we navigate away. Consider if it should be called here unconditionally.
-        // For now, let post-record UI handle explicit reset.
+        this.resetRecordingVariables() // Call reset after processing and UI update
       }
 
       this.mediaRecorder.start()
@@ -85,7 +81,7 @@ export class MediaRecorderManager {
       console.error("Error starting recording:", error)
       this.uiManager.showLoading(false)
       alert(`Could not start recording: ${error.message}. Please ensure permissions are granted.`)
-      this.resetRecordingVariables();
+      this.resetRecordingVariables(); // Clean up if start failed
       return false
     }
   }
@@ -93,7 +89,7 @@ export class MediaRecorderManager {
   resetRecordingVariables() {
     console.log("Resetting recording variables");
     if (this.mediaRecorder && (this.mediaRecorder.state === "recording" || this.mediaRecorder.state === "paused")) {
-        this.mediaRecorder.stop(); // This will trigger onstop
+        this.mediaRecorder.stop(); // Ensure it's stopped if somehow reset is called early
     }
     this.mediaRecorder = null
     this.recordedChunks = []
@@ -104,20 +100,18 @@ export class MediaRecorderManager {
       })
       this.canvasStream = null
     }
+    // No need to manage this.audioVideoStream separately anymore
   }
 
   stopRecording() {
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
-      this.mediaRecorder.stop()
+      this.mediaRecorder.stop() // This will trigger 'onstop'
       console.log("Recording stopping...")
     } else {
        console.log("Recorder not active or already stopped.");
-       // If stop is called when not recording, ensure UI state is consistent
-       this.uiManager.updateRecordButtonState(false); // Update button to "start"
-       this.uiManager.toggleRecordButton(true);     // Ensure button is visible
-       if (this.uiManager.recordPressedCount % 2 !== 0) { // If it was "pressed"
-            this.uiManager.recordPressedCount++;
-       }
+       // If stopRecording is called when not recording (e.g. UI allows it), ensure UI resets.
+       // This case should be handled by UI logic primarily.
+       // this.resetRecordingVariables(); // Maybe not here, onstop is primary for reset
     }
   }
 
@@ -135,10 +129,6 @@ export class MediaRecorderManager {
       console.error("Canvas stream not available for audio track replacement.")
       return
     }
-    if (!newCameraManagerMediaStream) {
-        console.error("New camera media stream is not available for audio switch.");
-        return;
-    }
 
     const newAudioTracks = newCameraManagerMediaStream.getAudioTracks()
     if (newAudioTracks.length === 0) {
@@ -146,15 +136,16 @@ export class MediaRecorderManager {
     }
     const newAudioTrack = newAudioTracks.length > 0 ? newAudioTracks[0] : null
 
+    // Remove all existing audio tracks from the canvasStream
     this.canvasStream.getAudioTracks().forEach(track => {
       console.log("Removing old audio track from canvasStream:", track.label, track.id)
       this.canvasStream.removeTrack(track)
-      track.stop()
+      track.stop() // Important: stop the old track to release resources
     })
 
     if (newAudioTrack) {
       console.log("Adding new audio track to canvasStream:", newAudioTrack.label, newAudioTrack.id)
-      this.canvasStream.addTrack(newAudioTrack.clone())
+      this.canvasStream.addTrack(newAudioTrack.clone()) // Clone to be safe
     } else {
       console.warn("No new audio track to add. Recording may continue with no audio on this segment.")
     }

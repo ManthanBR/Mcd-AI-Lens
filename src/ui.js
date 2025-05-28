@@ -3,17 +3,18 @@ import { Settings } from "./settings"
 export class UIManager {
   constructor() {
     this.recordButton = document.getElementById("record-button")
-    this.recordOutline = document.getElementById("outline") // This is an <img> tag
+    this.recordOutline = document.getElementById("outline")
     this.actionButton = document.getElementById("action-buttons")
     this.switchButton = document.getElementById("switch-button")
-    this.loadingIcon = document.getElementById("loading") // This is the <div> container for the loading image
+    this.loadingIcon = document.getElementById("loading")
     this.backButtonContainer = document.getElementById("back-button-container")
     this.recordPressedCount = 0
+    // Dependencies like mediaRecorder, cameraManager can be set via a method or passed to specific functions if needed
   }
 
   toggleRecordButton(isVisible) {
     if (isVisible) {
-      this.recordOutline.style.display = "block" // Assuming outline is an image/element to show
+      this.recordOutline.style.display = "block"
       this.recordButton.style.display = "block"
     } else {
       this.recordOutline.style.display = "none"
@@ -24,32 +25,32 @@ export class UIManager {
   updateRecordButtonState(isRecording) {
     this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
     if (!isRecording && this.recordPressedCount % 2 !== 0) { // If stopping
-        this.recordPressedCount++;
+        this.recordPressedCount++; // Ensure count is even after stopping
     } else if (isRecording && this.recordPressedCount % 2 === 0) { // If starting
         this.recordPressedCount++;
     }
+    // If recordPressedCount is directly manipulated elsewhere, this simple increment might need adjustment.
   }
 
 
   showLoading(show) {
-    // #loading is the div container
-    this.loadingIcon.style.display = show ? "flex" : "none";
+    this.loadingIcon.style.display = show ? "flex" : "none" // Use flex for centering if CSS is set up for it
   }
 
-  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) {
-    this.actionButton.style.display = "flex"
+  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) { // Added mediaRecorder, cameraManager
+    this.actionButton.style.display = "flex" // Use flex for layout if desired
     this.backButtonContainer.style.display = "block"
     this.switchButton.style.display = "none"
-    this.toggleRecordButton(false)
+    this.toggleRecordButton(false) // Hide record button
 
     document.getElementById("download-button").onclick = () => {
       const a = document.createElement("a")
       a.href = url
       a.download = Settings.recording.outputFileName
-      document.body.appendChild(a)
+      document.body.appendChild(a) // Append to body for Firefox compatibility
       a.click()
-      document.body.removeChild(a)
-      // Consider revoking URL if it's a one-time download and share isn't used, or after both.
+      document.body.removeChild(a) // Clean up
+      URL.revokeObjectURL(url); // Clean up object URL after some delay or if share is not used
     }
 
     document.getElementById("share-button").onclick = async () => {
@@ -66,6 +67,7 @@ export class UIManager {
           })
           console.log("File shared successfully")
         } else {
+          // Fallback for browsers that don't support navigator.share with files
           alert("Sharing files is not supported on this browser/device. Please download the video.")
           console.warn("navigator.canShare({ files: [file] }) returned false.")
         }
@@ -80,14 +82,11 @@ export class UIManager {
       this.backButtonContainer.style.display = "none"
       this.switchButton.style.display = "block"
       this.toggleRecordButton(true)
-      this.recordPressedCount = 0; // Reset count for a fresh start
+      this.recordPressedCount = 0; // Reset record press count for fresh state
 
       if (mediaRecorder) {
-        mediaRecorder.resetRecordingVariables() // Explicitly reset recorder state
+        mediaRecorder.resetRecordingVariables() // Already called by onstop usually, but good for explicit back
       }
-      // No need to call updateRenderSize explicitly here if window.resize handles it,
-      // unless there's a specific state that resize doesn't cover on back navigation.
-      // However, to be safe and ensure consistency:
       if (cameraManager) {
         const liveRenderTarget = document.getElementById("canvas")
         const currentSource = cameraManager.getSource()
@@ -95,31 +94,23 @@ export class UIManager {
           this.updateRenderSize(currentSource, liveRenderTarget)
         }
       }
-       if(url) URL.revokeObjectURL(url); // Clean up object URL as we are leaving this screen
+       if(url) URL.revokeObjectURL(url); // Clean up object URL when going back
     }
   }
 
   updateRenderSize(source, liveRenderTarget) {
-    if (!liveRenderTarget) {
-        console.warn("updateRenderSize called with invalid liveRenderTarget.");
+    if (!source || !liveRenderTarget) {
+        console.warn("updateRenderSize called with invalid source or liveRenderTarget.");
         return;
     }
-    const width = window.innerWidth;
-    const height = window.innerHeight;
+    const width = window.innerWidth
+    const height = window.innerHeight
 
-    // ONLY set the CSS style for display size
-    liveRenderTarget.style.width = `${width}px`;
-    liveRenderTarget.style.height = `${height}px`;
-
-    // DO NOT set canvas.width and canvas.height attributes here.
-    // Let CameraKit or the browser manage the drawing buffer size based on source.setRenderSize.
+    liveRenderTarget.width = width // Set canvas buffer size
+    liveRenderTarget.height = height
+    liveRenderTarget.style.width = `${width}px` // Set canvas display size
+    liveRenderTarget.style.height = `${height}px`
     
-    // Tell CameraKit the desired render resolution for the source
-    if (source && typeof source.setRenderSize === 'function') {
-        source.setRenderSize(width, height);
-    } else {
-        // This might happen if source is not yet initialized or is unexpectedly null
-        // console.warn("Source object in updateRenderSize is invalid or does not have setRenderSize method.");
-    }
+    source.setRenderSize(width, height)
   }
 }

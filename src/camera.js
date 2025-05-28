@@ -22,7 +22,7 @@ export class CameraManager {
     this.isBackFacing = !this.isBackFacing
 
     if (this.mediaStream) {
-      session.pause() // Pause session before changing source
+      session.pause()
       this.mediaStream.getTracks().forEach((track) => {
         track.stop()
       })
@@ -31,20 +31,18 @@ export class CameraManager {
 
     try {
       this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
-      const newSource = createMediaStreamSource(this.mediaStream, { // Renamed to newSource
+      const source = createMediaStreamSource(this.mediaStream, {
         cameraType: this.isBackFacing ? "environment" : "user",
-        disableSourceAudio: false,
+        disableSourceAudio: false, // Ensure audio is not disabled for the source
       })
-      this.currentSource = newSource // Update current source reference
+      this.currentSource = source // Update current source
 
-      await session.setSource(newSource) // Use newSource
+      await session.setSource(source)
       if (!this.isBackFacing) {
-        newSource.setTransform(Transform2D.MirrorX)
+        source.setTransform(Transform2D.MirrorX)
       }
-      // It's crucial that setRenderSize is called on this newSource as well.
-      // This will be handled by uiManager.updateRenderSize call in main.js's switchButton listener
       await session.play()
-      return newSource // Return the newly created source
+      return source
     } catch (error) {
       console.error("Failed to get media stream:", error)
       throw error
