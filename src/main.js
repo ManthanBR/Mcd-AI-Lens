@@ -60,51 +60,27 @@ const source = createMediaStreamSource(mediaStream, {
   await session.applyLens(lens)
 
   // Set up event listeners
-uiManager.recordButton.addEventListener("click", async () => {
-  if (uiManager.recordPressedCount % 2 === 0) {
-    const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
-    if (success) {
-      uiManager.updateRecordButtonState(true)
+  uiManager.recordButton.addEventListener("click", async () => {
+    if (uiManager.recordPressedCount % 2 === 0) {
+      const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
+      if (success) {
+        uiManager.updateRecordButtonState(true)
+      }
+    } else {
+      uiManager.updateRecordButtonState(false)
+      uiManager.toggleRecordButton(false)
+      mediaRecorder.stopRecording()
     }
-  } else {
-    uiManager.updateRecordButtonState(false)
-    uiManager.toggleRecordButton(false)
-    await mediaRecorder.finalizeRecording()
-  }
-})
+  })
 
-
-uiManager.switchButton.addEventListener("click", async () => {
-  try {
-    // Stop the current recording segment (but don't finalize)
-    if (mediaRecorder.recording) {
-      await mediaRecorder.stopCurrentSegment()
-      await new Promise((res) => setTimeout(res, 300))
+  uiManager.switchButton.addEventListener("click", async () => {
+    try {
+      const source = await cameraManager.updateCamera(session)
+      uiManager.updateRenderSize(source, liveRenderTarget)
+    } catch (error) {
+      console.error("Error switching camera:", error)
     }
-
-    // Switch the camera (this sets new media stream and source)
-    const source = await cameraManager.updateCamera(session)
-    await session.setSource(source)
-
-    if (!cameraManager.isBackFacing) {
-      source.setTransform(Transform2D.MirrorX)
-    }
-
-    await source.setRenderSize(window.innerWidth, window.innerHeight)
-    await session.play()
-
-    // Update canvas render size
-    uiManager.updateRenderSize(source, liveRenderTarget)
-
-    // Resume recording with the new feed
-    if (mediaRecorder.recording) {
-      await mediaRecorder._startNewSegment() // private call inside manager
-    }
-  } catch (error) {
-    console.error("Error switching camera while recording:", error)
-  }
-})
-
+  })
 
   // Add back button handler
   document.getElementById("back-button").addEventListener("click", async () => {
