@@ -8,7 +8,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: auto;
   height: 100vh; /* <-- ADDED/MODIFIED: Ensure canvas element fills viewport height */
   z-index: 1;
   display: block; /* <-- ADDED: Good practice for canvas to avoid potential extra space */
