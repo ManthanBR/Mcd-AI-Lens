@@ -18,34 +18,35 @@ export class CameraManager {
   }
 
   async updateCamera(session) {
-    this.isBackFacing = !this.isBackFacing
+  this.isBackFacing = !this.isBackFacing
 
-    if (this.mediaStream) {
-      session.pause()
-      this.mediaStream.getTracks().forEach((track) => {
-        track.stop()
-      })
-      this.mediaStream = null
-    }
-
-    try {
-      this.mediaStream = await navigator.mediaDevices.getUserMedia(this.getConstraints())
-      const source = createMediaStreamSource(this.mediaStream, {
-        cameraType: this.isBackFacing ? "environment" : "user",
-        disableSourceAudio: false,
-      })
-
-      await session.setSource(source)
-      if (!this.isBackFacing) {
-        source.setTransform(Transform2D.MirrorX)
-      }
-      await session.play()
-      return source
-    } catch (error) {
-      console.error("Failed to get media stream:", error)
-      throw error
-    }
+  if (this.mediaStream) {
+    this.mediaStream.getTracks().forEach((track) => track.stop())
+    this.mediaStream = null
   }
+
+  try {
+    const constraints = this.getConstraints()
+    this.mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+
+    const source = createMediaStreamSource(this.mediaStream, {
+      cameraType: this.isBackFacing ? "environment" : "user",
+      disableSourceAudio: false,
+    })
+
+    await session.setSource(source)
+
+    if (!this.isBackFacing) {
+      source.setTransform(Transform2D.MirrorX)
+    }
+
+    return source
+  } catch (error) {
+    console.error("Failed to get media stream:", error)
+    throw error
+  }
+}
+
 
   getConstraints() {
     return this.isMobile ? (this.isBackFacing ? Settings.camera.constraints.back : Settings.camera.constraints.front) : Settings.camera.constraints.desktop

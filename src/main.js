@@ -76,11 +76,32 @@ uiManager.recordButton.addEventListener("click", async () => {
 
 uiManager.switchButton.addEventListener("click", async () => {
   try {
-    await mediaRecorder.switchCameraSegment()
+    // Stop the current recording segment (but don't finalize)
+    if (mediaRecorder.recording) {
+      await mediaRecorder.stopCurrentSegment()
+      await new Promise((res) => setTimeout(res, 300))
+    }
+
+    // Switch the camera (this sets new media stream and source)
     const source = await cameraManager.updateCamera(session)
+    await session.setSource(source)
+
+    if (!cameraManager.isBackFacing) {
+      source.setTransform(Transform2D.MirrorX)
+    }
+
+    await source.setRenderSize(window.innerWidth, window.innerHeight)
+    await session.play()
+
+    // Update canvas render size
     uiManager.updateRenderSize(source, liveRenderTarget)
+
+    // Resume recording with the new feed
+    if (mediaRecorder.recording) {
+      await mediaRecorder._startNewSegment() // private call inside manager
+    }
   } catch (error) {
-    console.error("Camera switch error:", error)
+    console.error("Error switching camera while recording:", error)
   }
 })
 
