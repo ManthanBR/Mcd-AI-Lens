@@ -1,247 +1,228 @@
+/* Global reset and box-sizing */
+html {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
 body {
+  height: 100%;
   margin: 0;
   padding: 0;
   overflow: hidden;
+  position: relative;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  background-color: #000; /* Optional: background for areas not covered by canvas immediately */
 }
 
 #canvas {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100vw;  /* Reverted to original working style */
+  height: 100vh; /* Added for robustness, helps ensure canvas aims for full viewport height */
+                 /* If cropping persists, try removing this 'height: 100vh;' to be exactly like the first code's implied height */
+  display: block; 
   z-index: 1;
 }
 
 .poweredbysnap-logo {
-  width: auto; /* Set to auto to avoid stretching */
-  position: absolute; /* Position relative to the viewport */
-  bottom: -40px; /* Adjust to desired distance from the bottom */
-  left: 40px; /* Adjust to desired distance from the left */
+  width: auto;
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Align content within the element to the left */
+  justify-content: flex-start;
   z-index: 900;
 }
 
 .poweredbysnap-logo > img {
-  width: 180px;
+  width: 150px;
+  height: auto;
 }
 
 #controls {
   position: absolute;
-  bottom: 10%;
+  bottom: 5%;
   width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center;
   z-index: 999;
+  /* Contains #outline (img) and #record-button (button) */
 }
 
-#outline {
-  position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  height: var(--button-size, 200px); /* Default for mobile */
-  width: var(--button-size, 200px);
+#outline { /* This is an <img> in your HTML */
+  position: absolute; /* Positioned absolutely within #controls' flex centered space */
+  /* It will be centered because #controls is flex center. */
+  /* The record button will overlay it. */
+  height: 90px; /* Adjust size, should be slightly larger than record button for outline effect */
+  width: 90px;
+  object-fit: contain; /* Ensures image aspect ratio is maintained */
+  z-index: 900; /* Below record button */
+}
+
+.button-class { /* Common class for all interactive buttons */
+  background-color: transparent;
   border: none;
-  z-index: 900;
-  transition: background-color 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  padding: 0;
+  transition: transform 0.1s ease-in-out;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#record-button {
-  position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  height: var(--button-size, 200px); /* Default for mobile */
-  width: var(--button-size, 200px);
-  background-image: url("../assets/RecordButton.png");
-  background-size: cover;
+.button-class img { /* For buttons that contain an <img> tag for their icon */
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  height: auto;
+  width: auto; /* Let image scale naturally */
+}
+
+.button-class:active {
+  transform: scale(0.92);
+}
+
+#record-button { /* Inherits .button-class */
+  /* Positioned by #controls flex centering */
+  height: 80px;
+  width: 80px;
+  background-size: contain; /* Ensures whole image is visible */
   background-position: center;
   background-repeat: no-repeat;
-  background-color: transparent;
-  border-radius: 50%;
-  border: none;
-  z-index: 1000;
-  transition: background-color 0.2s ease;
-}
-
-#record-button.pressed {
-  background-color: green; /* Change to green when pressed */
-  content: "Recording..."; /* Optionally add text */
+  border-radius: 50%; /* If the image itself isn't round but button should appear so */
+  z-index: 1000; /* Above outline */
+  /* background-image set by JS */
 }
 
 #action-buttons {
   position: absolute;
-  bottom: 20%; /* Adjust the distance from the bottom of the screen */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%); /* Offset by half the width and height */
-  display: flex; /* Enables flex layout */
-  justify-content: center; /* Aligns buttons horizontally */
-  align-items: center; /* Aligns buttons vertically */
-  z-index: 1000; /* Ensure visibility above other elements */
-  flex-wrap: wrap; /* Allows wrapping if container width is too small */
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none; /* JS will make it flex */
+  justify-content: center;
+  align-items: center;
+  gap: 30px; /* Space between share and download */
+  z-index: 1000;
+}
+
+#share-button,
+#download-button { /* Inherit .button-class */
+  height: 70px;
+  width: 70px;
 }
 
 #back-button-container {
   position: absolute;
-  top: 2%;
-  left: 3%;
+  top: 20px;
+  left: 20px;
   z-index: 1000;
+  display: none; /* JS will make it block */
 }
 
-#back-button {
-  transform: none;
-  background-color: transparent;
-  height: 100px;
-  width: 100px;
-  color: transparent;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  padding: 0%;
-  transition: transform 0.15s ease-in-out;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-}
-#back-button img {
-  /* Add this if your button uses an image */
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-}
-
-#back-button:active {
-  transform: translate(2px, 2px);
-}
-
-#share-button {
-  height: 150px;
-  width: 150px;
-  background-color: transparent;
-  transform: translate(-25%, 0);
-  color: transparent;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  padding: 0%;
-  transition: transform 0.15s ease-in-out;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-}
-
-#share-button img {
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-}
-
-#share-button:active {
-  transform: translate(calc(-25% + 2px), 2px);
-}
-
-#download-button {
-  height: 150px;
-  width: 150px;
-  background-color: transparent;
-  transform: translate(25%, 0);
-  color: transparent;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  padding: 0%;
-  transition: transform 0.15s ease-in-out;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
-}
-
-#download-button img {
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-}
-
-#download-button:active {
-  transform: translate(calc(25% + 2px), 2px);
+#back-button { /* Inherits .button-class */
+  height: 50px;
+  width: 50px;
 }
 
 #switch-cam {
   position: absolute;
-  top: 3%;
-  right: 5%;
+  top: 20px;
+  right: 20px;
   z-index: 950;
 }
 
-#switch-button {
-  height: 70px;
-  width: 70px;
-  background-image: url("../assets/SwitchButton.png"); /* Green background */
-  background-size: contain; /* Ensure the image covers the button */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Preent tiling */
-  background-color: transparent;
-  border: none;
-  user-select: none; /* Disable text selection */
-  outline: none;
-  transition: transform 0.2s ease; /* Smooth hover animation */
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
+#switch-button { /* Inherits .button-class */
+  height: 50px;
+  width: 50px;
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* background-image set by JS or directly if static from settings.js assets */
+  /* In your HTML, switch-button doesn't have an <img>, relies on background-image */
+  /* The url is in the original CSS: url("../assets/SwitchButton.png") */
+  /* If you want to use settings.js, you'd set it in JS like the record button. */
+  /* For now, let's assume the CSS path from your original CSS is what you want: */
+  background-image: url("../assets/SwitchButton.png");
 }
 
-#switch-button:active {
-  transform: translate(5%, 5%); /* Only scale without affecting translation */
+
+#loading { /* This is the <div> container */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none; /* JS toggles to 'flex' */
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 2000;
 }
 
-#loading {
-  position: absolute;
-  top: 30%;
-  left: 40%;
-  z-index: 900;
-  display: none; /* Hidden by default */
+#loading-icon { /* This is the <img> tag inside #loading */
+  height: 100px;
+  width: 100px;
+  animation: spin 1s linear infinite;
+  object-fit: contain;
 }
 
-#loading-icon {
-  height: 200px;
-  width: 200px;
-  animation: spin 2s linear infinite; /* Apply the spin animation */
-}
-
-/* Keyframes for the rotation */
 @keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 /* Desktop-specific styles */
-.desktop #outline,
+/* These apply if body has class 'desktop' (added by CameraManager) */
+.desktop #outline {
+  height: 80px;
+  width: 80px;
+}
 .desktop #record-button {
   height: 70px;
   width: 70px;
 }
 
-.desktop #share-button {
-  height: 70px;
-  width: 70px;
-}
-
+.desktop #share-button,
 .desktop #download-button {
-  height: 70px;
-  width: 70px;
+  height: 60px;
+  width: 60px;
 }
 
-.desktop #back-button {
-  height: 50px;
-  width: 50px;
+.desktop #back-button,
+.desktop #switch-button { /* Assuming switch button might be smaller on desktop */
+  height: 40px;
+  width: 40px;
 }
 
-/* Hide switch button on desktop */
 .desktop #switch-cam {
-  display: none;
+  display: none; /* Hide switch camera UI on desktop */
+}
+
+/* Example for small mobile screens, adjust breakpoint as needed */
+@media (max-width: 380px) {
+  .poweredbysnap-logo > img {
+    width: 100px;
+  }
+  #outline { height: 70px; width: 70px; }
+  #record-button { height: 60px; width: 60px; }
+  #share-button, #download-button { height: 55px; width: 55px; }
+  #back-button, #switch-button { height: 40px; width: 40px; }
+  #controls { bottom: 3%; }
+  #action-buttons { bottom: 8%; gap: 20px; }
 }
