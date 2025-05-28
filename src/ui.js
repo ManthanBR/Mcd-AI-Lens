@@ -9,7 +9,6 @@ export class UIManager {
     this.loadingIcon = document.getElementById("loading")
     this.backButtonContainer = document.getElementById("back-button-container")
     this.recordPressedCount = 0
-    // Dependencies like mediaRecorder, cameraManager can be set via a method or passed to specific functions if needed
   }
 
   toggleRecordButton(isVisible) {
@@ -24,33 +23,32 @@ export class UIManager {
 
   updateRecordButtonState(isRecording) {
     this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
-    if (!isRecording && this.recordPressedCount % 2 !== 0) { // If stopping
-        this.recordPressedCount++; // Ensure count is even after stopping
-    } else if (isRecording && this.recordPressedCount % 2 === 0) { // If starting
+    if (!isRecording && this.recordPressedCount % 2 !== 0) {
+        this.recordPressedCount++;
+    } else if (isRecording && this.recordPressedCount % 2 === 0) {
         this.recordPressedCount++;
     }
-    // If recordPressedCount is directly manipulated elsewhere, this simple increment might need adjustment.
   }
 
 
   showLoading(show) {
-    this.loadingIcon.style.display = show ? "flex" : "none" // Use flex for centering if CSS is set up for it
+    this.loadingIcon.style.display = show ? "flex" : "none";
   }
 
-  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) { // Added mediaRecorder, cameraManager
-    this.actionButton.style.display = "flex" // Use flex for layout if desired
+  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) {
+    this.actionButton.style.display = "flex"
     this.backButtonContainer.style.display = "block"
     this.switchButton.style.display = "none"
-    this.toggleRecordButton(false) // Hide record button
+    this.toggleRecordButton(false)
 
     document.getElementById("download-button").onclick = () => {
       const a = document.createElement("a")
       a.href = url
       a.download = Settings.recording.outputFileName
-      document.body.appendChild(a) // Append to body for Firefox compatibility
+      document.body.appendChild(a)
       a.click()
-      document.body.removeChild(a) // Clean up
-      URL.revokeObjectURL(url); // Clean up object URL after some delay or if share is not used
+      document.body.removeChild(a)
+      // URL.revokeObjectURL(url); // Consider revoking later, e.g., in back button or after share
     }
 
     document.getElementById("share-button").onclick = async () => {
@@ -67,7 +65,6 @@ export class UIManager {
           })
           console.log("File shared successfully")
         } else {
-          // Fallback for browsers that don't support navigator.share with files
           alert("Sharing files is not supported on this browser/device. Please download the video.")
           console.warn("navigator.canShare({ files: [file] }) returned false.")
         }
@@ -82,11 +79,12 @@ export class UIManager {
       this.backButtonContainer.style.display = "none"
       this.switchButton.style.display = "block"
       this.toggleRecordButton(true)
-      this.recordPressedCount = 0; // Reset record press count for fresh state
+      this.recordPressedCount = 0;
 
       if (mediaRecorder) {
-        mediaRecorder.resetRecordingVariables() // Already called by onstop usually, but good for explicit back
+        mediaRecorder.resetRecordingVariables()
       }
+      // Re-calculate and apply render size on back, in case orientation changed etc.
       if (cameraManager) {
         const liveRenderTarget = document.getElementById("canvas")
         const currentSource = cameraManager.getSource()
@@ -94,7 +92,7 @@ export class UIManager {
           this.updateRenderSize(currentSource, liveRenderTarget)
         }
       }
-       if(url) URL.revokeObjectURL(url); // Clean up object URL when going back
+       if(url) URL.revokeObjectURL(url);
     }
   }
 
@@ -103,14 +101,44 @@ export class UIManager {
         console.warn("updateRenderSize called with invalid source or liveRenderTarget.");
         return;
     }
-    const width = window.innerWidth
-    const height = window.innerHeight
 
-    liveRenderTarget.width = width // Set canvas buffer size
-    liveRenderTarget.height = height
-    liveRenderTarget.style.width = `${width}px` // Set canvas display size
-    liveRenderTarget.style.height = `${height}px`
+    const screenWidth = window.innerWidth;
+    const screenHeight = window.innerHeight;
+    const targetAspectRatio = 9 / 16; // Target W/H ratio
+
+    let newCanvasWidth;
+    let newCanvasHeight;
+
+    // Calculate dimensions for 9:16 aspect ratio that fits within the screen
+    // This formula prioritizes fitting within the screen dimensions while maintaining 9:16
+    if (screenHeight * targetAspectRatio <= screenWidth) {
+      // Screen is wide enough (or wider) to fit 9:16 using full screen height
+      newCanvasHeight = screenHeight;
+      newCanvasWidth = Math.floor(screenHeight * targetAspectRatio);
+    } else {
+      // Screen is too narrow for full height 9:16, so fit to screen width
+      newCanvasWidth = screenWidth;
+      newCanvasHeight = Math.floor(screenWidth / targetAspectRatio); // width * (16/9)
+    }
     
-    source.setRenderSize(width, height)
+    // Ensure dimensions are integers
+    newCanvasWidth = Math.floor(newCanvasWidth);
+    newCanvasHeight = Math.floor(newCanvasHeight);
+
+    // Apply to canvas style for display
+    liveRenderTarget.style.width = `${newCanvasWidth}px`;
+    liveRenderTarget.style.height = `${newCanvasHeight}px`;
+
+    // Center the canvas on the screen
+    liveRenderTarget.style.position = 'absolute'; // Ensure positioning context
+    liveRenderTarget.style.left = `${(screenWidth - newCanvasWidth) / 2}px`;
+    liveRenderTarget.style.top = `${(screenHeight - newCanvasHeight) / 2}px`;
+
+    // Apply to canvas drawing buffer
+    liveRenderTarget.width = newCanvasWidth;
+    liveRenderTarget.height = newCanvasHeight;
+    
+    // Tell Camera Kit to render to these 9:16 dimensions
+    source.setRenderSize(newCanvasWidth, newCanvasHeight);
   }
 }
