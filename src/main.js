@@ -19,18 +19,19 @@ import { Settings } from "./settings"
   const lensID = process.env.LENS_ID
   const groupID = process.env.GROUP_ID
 
-  const loadingElement = document.getElementById("loading") // Get loading element early
-
   if (!apiToken || !lensID || !groupID) {
     console.error("Missing required environment variables. Please check your environment settings.")
-    if (loadingElement) loadingElement.innerHTML = "Configuration error. Please check console and refresh."
+    // Display error to user in a more friendly way if possible
+    const loadingElement = document.getElementById("loading")
+    if (loadingElement) loadingElement.innerHTML = "Configuration error. Please check console."
     return
   }
 
   // Initialize managers
   const cameraManager = new CameraManager()
-  const uiManager = new UIManager()
+  const uiManager = new UIManager() // UIManager dependencies will be set later if needed, or passed to methods
   const videoProcessor = new VideoProcessor()
+  // Pass cameraManager to MediaRecorderManager constructor
   const mediaRecorder = new MediaRecorderManager(videoProcessor, uiManager, cameraManager)
 
 
@@ -41,94 +42,72 @@ import { Settings } from "./settings"
 
   // Get canvas element for live render target
   const liveRenderTarget = document.getElementById("canvas")
-  // Add a background color to the canvas via CSS or JS to see letterboxing/pillarboxing
-  liveRenderTarget.style.backgroundColor = 'black';
-
 
   // Create camera kit session
   const session = await cameraKit.createSession({ liveRenderTarget })
 
   // Initialize camera and set up source
-  try {
-    const mediaStream = await cameraManager.initializeCamera() // This now sets stream dimensions in cameraManager
+  const mediaStream = await cameraManager.initializeCamera()
+  const initialSource = createMediaStreamSource(mediaStream, { // Renamed to initialSource for clarity
+    cameraType: cameraManager.isBackFacing ? "environment" : "user",
+    disableSourceAudio: false, // Ensure audio is not disabled for the source
+  })
+  cameraManager.currentSource = initialSource // Store initial source in CameraManager
+  await session.setSource(initialSource)
 
-    // A short delay here might give _updateStreamDimensions more time to get accurate values
-    // This is a pragmatic workaround if initial dimensions are often reported as 0.
-    await new Promise(resolve => setTimeout(resolve, 200)); // e.g., 200ms
-
-    const initialSource = createMediaStreamSource(mediaStream, {
-      cameraType: cameraManager.isBackFacing ? "environment" : "user",
-      disableSourceAudio: false,
-    })
-    cameraManager.currentSource = initialSource
-    await session.setSource(initialSource)
-
-    if (!cameraManager.isBackFacing) {
-      initialSource.setTransform(Transform2D.MirrorX)
-    }
-    
-    // SetRenderSize will be called by uiManager.updateRenderSize shortly
-    await session.setFPSLimit(Settings.camera.fps)
-    await session.play()
-
-    // Load and apply lens
-    const lens = await cameraKit.lensRepository.loadLens(lensID, groupID)
-    await session.applyLens(lens)
-
-    // Update initial render size
-    // Ensure cameraManager.getSource() is valid and stream dimensions are (hopefully) set
-    if (cameraManager.getSource()) {
-      uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget, cameraManager)
-    } else {
-      console.error("Initial source not available for first render size update.");
-    }
-
-  } catch (err) {
-    console.error("Error during camera initialization or lens loading:", err);
-    if (loadingElement) loadingElement.innerHTML = `Error: ${err.message}. Please check permissions and refresh.`;
-    // Potentially show a user-friendly error message on the page
-    return; // Stop execution if critical setup fails
+  if (!cameraManager.isBackFacing) {
+    initialSource.setTransform(Transform2D.MirrorX)
   }
+  // SetRenderSize will be called by uiManager.updateRenderSize
+  await session.setFPSLimit(Settings.camera.fps)
+  await session.play()
 
+  // Load and apply lens
+  const lens = await cameraKit.lensRepository.loadLens(lensID, groupID)
+  await session.applyLens(lens)
 
   // Set up event listeners
   uiManager.recordButton.addEventListener("click", async () => {
     if (uiManager.recordPressedCount % 2 === 0) {
+      // Pass cameraManager instance to startRecording
       const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager)
       if (success) {
         uiManager.updateRecordButtonState(true)
+      } else {
+        // If starting failed, reset UI relevant parts (e.g. recordPressedCount)
+        // uiManager.recordPressedCount may need to be handled carefully if start fails
       }
     } else {
       uiManager.updateRecordButtonState(false)
-      uiManager.toggleRecordButton(false)
+      uiManager.toggleRecordButton(false) // This hides the record button after stopping
       mediaRecorder.stopRecording()
     }
   })
 
   uiManager.switchButton.addEventListener("click", async () => {
     try {
-      const newSource = await cameraManager.updateCamera(session) // This now updates stream dimensions
+      // cameraManager.updateCamera updates cameraManager.mediaStream and cameraManager.currentSource
+      const newSource = await cameraManager.updateCamera(session)
+      uiManager.updateRenderSize(newSource, liveRenderTarget)
 
-      // A short delay similar to initialization might be needed if dimensions are not immediately correct
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      uiManager.updateRenderSize(newSource, liveRenderTarget, cameraManager)
-
+      // If recording, switch the audio track for the MediaRecorder
       if (mediaRecorder.isRecording()) {
-        mediaRecorder.switchCameraAudio(cameraManager.mediaStream)
+        mediaRecorder.switchCameraAudio(cameraManager.mediaStream) // Use the new mediaStream from cameraManager
       }
     } catch (error) {
       console.error("Error switching camera:", error)
+      // Potentially inform the user
     }
   })
 
+  // The back-button's onclick is now primarily managed within UIManager.displayPostRecordButtons
+  // to ensure it has access to necessary instances for resetting state.
 
-  window.addEventListener("resize", () => {
-    if (cameraManager.getSource() && liveRenderTarget && cameraManager) {
-        // It's good practice to debounce or throttle resize events if performance becomes an issue
-        uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget, cameraManager)
-    }
-  })
-  
+  // Add window resize listener
+  window.addEventListener("resize", () => uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget))
+
+  // Update initial render size
+  uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget)
+  // Hide loading icon once everything is ready
   uiManager.showLoading(false);
 })()

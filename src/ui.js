@@ -9,6 +9,7 @@ export class UIManager {
     this.loadingIcon = document.getElementById("loading")
     this.backButtonContainer = document.getElementById("back-button-container")
     this.recordPressedCount = 0
+    // Dependencies like mediaRecorder, cameraManager can be set via a method or passed to specific functions if needed
   }
 
   toggleRecordButton(isVisible) {
@@ -23,32 +24,33 @@ export class UIManager {
 
   updateRecordButtonState(isRecording) {
     this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
-    if (!isRecording && this.recordPressedCount % 2 !== 0) {
-        this.recordPressedCount++;
-    } else if (isRecording && this.recordPressedCount % 2 === 0) {
+    if (!isRecording && this.recordPressedCount % 2 !== 0) { // If stopping
+        this.recordPressedCount++; // Ensure count is even after stopping
+    } else if (isRecording && this.recordPressedCount % 2 === 0) { // If starting
         this.recordPressedCount++;
     }
+    // If recordPressedCount is directly manipulated elsewhere, this simple increment might need adjustment.
   }
 
 
   showLoading(show) {
-    this.loadingIcon.style.display = show ? "flex" : "none"
+    this.loadingIcon.style.display = show ? "flex" : "none" // Use flex for centering if CSS is set up for it
   }
 
-  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) {
-    this.actionButton.style.display = "flex"
+  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) { // Added mediaRecorder, cameraManager
+    this.actionButton.style.display = "flex" // Use flex for layout if desired
     this.backButtonContainer.style.display = "block"
     this.switchButton.style.display = "none"
-    this.toggleRecordButton(false)
+    this.toggleRecordButton(false) // Hide record button
 
     document.getElementById("download-button").onclick = () => {
       const a = document.createElement("a")
       a.href = url
       a.download = Settings.recording.outputFileName
-      document.body.appendChild(a)
+      document.body.appendChild(a) // Append to body for Firefox compatibility
       a.click()
-      document.body.removeChild(a)
-      // URL.revokeObjectURL(url); // Consider revoking later or if share isn't used
+      document.body.removeChild(a) // Clean up
+      URL.revokeObjectURL(url); // Clean up object URL after some delay or if share is not used
     }
 
     document.getElementById("share-button").onclick = async () => {
@@ -65,6 +67,7 @@ export class UIManager {
           })
           console.log("File shared successfully")
         } else {
+          // Fallback for browsers that don't support navigator.share with files
           alert("Sharing files is not supported on this browser/device. Please download the video.")
           console.warn("navigator.canShare({ files: [file] }) returned false.")
         }
@@ -79,83 +82,35 @@ export class UIManager {
       this.backButtonContainer.style.display = "none"
       this.switchButton.style.display = "block"
       this.toggleRecordButton(true)
-      this.recordPressedCount = 0;
+      this.recordPressedCount = 0; // Reset record press count for fresh state
 
       if (mediaRecorder) {
-        mediaRecorder.resetRecordingVariables()
+        mediaRecorder.resetRecordingVariables() // Already called by onstop usually, but good for explicit back
       }
       if (cameraManager) {
         const liveRenderTarget = document.getElementById("canvas")
         const currentSource = cameraManager.getSource()
         if (currentSource && liveRenderTarget) {
-          this.updateRenderSize(currentSource, liveRenderTarget, cameraManager)
+          this.updateRenderSize(currentSource, liveRenderTarget)
         }
       }
-       if(url) URL.revokeObjectURL(url);
+       if(url) URL.revokeObjectURL(url); // Clean up object URL when going back
     }
   }
 
-  updateRenderSize(source, liveRenderTarget, cameraManager) {
-    if (!source || !liveRenderTarget || !cameraManager) {
-        console.warn("updateRenderSize: Missing source, liveRenderTarget, or cameraManager.");
+  updateRenderSize(source, liveRenderTarget) {
+    if (!source || !liveRenderTarget) {
+        console.warn("updateRenderSize called with invalid source or liveRenderTarget.");
         return;
     }
+    const width = window.innerWidth
+    const height = window.innerHeight
 
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    const streamDim = cameraManager.getStreamDimensions(); // This now gets potentially delayed-updated dimensions
-    let streamWidth = streamDim.width;
-    let streamHeight = streamDim.height;
-
-    // If dimensions are still fallback (e.g., 1280x720), and we expect them to be different (e.g., portrait mobile)
-    // we might need a more robust way to get actual dimensions, or a delay for them to be reported.
-    // For now, proceed with what cameraManager provides.
-    if (streamWidth === 0 || streamHeight === 0) {
-        console.error("Stream dimensions are zero or fallback defaults. Canvas sizing might be incorrect or use defaults.");
-        // If dimensions are truly zero, use viewport as a last resort, which might stretch
-        // but is better than crashing.
-        streamWidth = streamWidth === 0 ? viewportWidth : streamWidth;
-        streamHeight = streamHeight === 0 ? viewportHeight : streamHeight;
-    }
-
-
-    const streamAspectRatio = streamWidth / streamHeight;
-    const viewportAspectRatio = viewportWidth / viewportHeight;
-
-    let displayWidth;
-    let displayHeight;
-
-    // Determine display dimensions to fit and maintain aspect ratio
-    if (streamAspectRatio > viewportAspectRatio) {
-      // Stream is wider than viewport (needs letterboxing: black bars top/bottom)
-      displayWidth = viewportWidth;
-      displayHeight = viewportWidth / streamAspectRatio;
-    } else {
-      // Stream is taller or same aspect as viewport (needs pillarboxing: black bars left/right)
-      displayHeight = viewportHeight;
-      displayWidth = viewportHeight * streamAspectRatio;
-    }
-
-    // Set canvas drawing buffer size to actual stream dimensions (or our best guess from cameraManager)
-    liveRenderTarget.width = streamWidth;
-    liveRenderTarget.height = streamHeight;
-
-    // Set canvas CSS display size
-    liveRenderTarget.style.width = `${displayWidth}px`;
-    liveRenderTarget.style.height = `${displayHeight}px`;
-
-    // Center the canvas
-    liveRenderTarget.style.position = 'absolute'; // Ensure it's 'absolute' for top/left to work
-    liveRenderTarget.style.top = `${(viewportHeight - displayHeight) / 2}px`;
-    liveRenderTarget.style.left = `${(viewportWidth - displayWidth) / 2}px`;
-
-    // Tell Camera Kit source to render at the buffer's dimensions
-    source.setRenderSize(streamWidth, streamHeight);
+    liveRenderTarget.width = width // Set canvas buffer size
+    liveRenderTarget.height = height
+    liveRenderTarget.style.width = `${width}px` // Set canvas display size
+    liveRenderTarget.style.height = `${height}px`
     
-    console.log(`Viewport: ${viewportWidth}x${viewportHeight} (AR: ${viewportAspectRatio.toFixed(2)})`);
-    console.log(`Stream (from cameraManager): ${streamWidth}x${streamHeight} (AR: ${streamAspectRatio.toFixed(2)})`);
-    console.log(`Canvas Buffer: ${liveRenderTarget.width}x${liveRenderTarget.height}`);
-    console.log(`Canvas Display: ${displayWidth.toFixed(0)}x${displayHeight.toFixed(0)}, Top: ${liveRenderTarget.style.top}, Left: ${liveRenderTarget.style.left}`);
+    source.setRenderSize(width, height)
   }
 }
