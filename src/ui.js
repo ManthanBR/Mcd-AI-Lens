@@ -9,7 +9,6 @@ export class UIManager {
     this.loadingIcon = document.getElementById("loading")
     this.backButtonContainer = document.getElementById("back-button-container")
     this.recordPressedCount = 0
-    // Dependencies like mediaRecorder, cameraManager can be set via a method or passed to specific functions if needed
   }
 
   toggleRecordButton(isVisible) {
@@ -24,33 +23,32 @@ export class UIManager {
 
   updateRecordButtonState(isRecording) {
     this.recordButton.style.backgroundImage = isRecording ? `url('${Settings.ui.recordButton.stopImage}')` : `url('${Settings.ui.recordButton.startImage}')`
-    if (!isRecording && this.recordPressedCount % 2 !== 0) { // If stopping
-        this.recordPressedCount++; // Ensure count is even after stopping
-    } else if (isRecording && this.recordPressedCount % 2 === 0) { // If starting
+    if (!isRecording && this.recordPressedCount % 2 !== 0) { 
+        this.recordPressedCount++; 
+    } else if (isRecording && this.recordPressedCount % 2 === 0) { 
         this.recordPressedCount++;
     }
-    // If recordPressedCount is directly manipulated elsewhere, this simple increment might need adjustment.
   }
 
 
   showLoading(show) {
-    this.loadingIcon.style.display = show ? "flex" : "none" // Use flex for centering if CSS is set up for it
+    this.loadingIcon.style.display = show ? "flex" : "none" 
   }
 
-  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) { // Added mediaRecorder, cameraManager
-    this.actionButton.style.display = "flex" // Use flex for layout if desired
+  displayPostRecordButtons(url, fixedBlob, mediaRecorder, cameraManager) { 
+    this.actionButton.style.display = "flex" 
     this.backButtonContainer.style.display = "block"
     this.switchButton.style.display = "none"
-    this.toggleRecordButton(false) // Hide record button
+    this.toggleRecordButton(false) 
 
     document.getElementById("download-button").onclick = () => {
       const a = document.createElement("a")
       a.href = url
       a.download = Settings.recording.outputFileName
-      document.body.appendChild(a) // Append to body for Firefox compatibility
+      document.body.appendChild(a) 
       a.click()
-      document.body.removeChild(a) // Clean up
-      URL.revokeObjectURL(url); // Clean up object URL after some delay or if share is not used
+      document.body.removeChild(a) 
+      // URL.revokeObjectURL(url); // Consider revoking later or if share not used
     }
 
     document.getElementById("share-button").onclick = async () => {
@@ -67,7 +65,6 @@ export class UIManager {
           })
           console.log("File shared successfully")
         } else {
-          // Fallback for browsers that don't support navigator.share with files
           alert("Sharing files is not supported on this browser/device. Please download the video.")
           console.warn("navigator.canShare({ files: [file] }) returned false.")
         }
@@ -82,11 +79,12 @@ export class UIManager {
       this.backButtonContainer.style.display = "none"
       this.switchButton.style.display = "block"
       this.toggleRecordButton(true)
-      this.recordPressedCount = 0; // Reset record press count for fresh state
+      this.recordPressedCount = 0; 
 
       if (mediaRecorder) {
-        mediaRecorder.resetRecordingVariables() // Already called by onstop usually, but good for explicit back
+        mediaRecorder.resetRecordingVariables() 
       }
+      // When going back, ensure the render size is updated correctly for the live preview
       if (cameraManager) {
         const liveRenderTarget = document.getElementById("canvas")
         const currentSource = cameraManager.getSource()
@@ -94,7 +92,7 @@ export class UIManager {
           this.updateRenderSize(currentSource, liveRenderTarget)
         }
       }
-       if(url) URL.revokeObjectURL(url); // Clean up object URL when going back
+       if(url) URL.revokeObjectURL(url); 
     }
   }
 
@@ -103,14 +101,43 @@ export class UIManager {
         console.warn("updateRenderSize called with invalid source or liveRenderTarget.");
         return;
     }
-    const width = window.innerWidth
-    const height = window.innerHeight
 
-    liveRenderTarget.width = width // Set canvas buffer size
-    liveRenderTarget.height = height
-    liveRenderTarget.style.width = `${width}px` // Set canvas display size
-    liveRenderTarget.style.height = `${height}px`
-    
-    source.setRenderSize(width, height)
+    const targetCanvasWidth = 1080;
+    const targetCanvasHeight = 1920;
+    const targetAspectRatio = targetCanvasWidth / targetCanvasHeight; // Should be 9/16
+
+    // Set the Camera Kit source render size and canvas internal buffer size
+    source.setRenderSize(targetCanvasWidth, targetCanvasHeight);
+    liveRenderTarget.width = targetCanvasWidth;
+    liveRenderTarget.height = targetCanvasHeight;
+
+    // Calculate the display size for the canvas element to fit the screen while maintaining aspect ratio
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+    const windowAspectRatio = windowWidth / windowHeight;
+
+    let displayWidth;
+    let displayHeight;
+
+    if (windowAspectRatio > targetAspectRatio) {
+      // Window is wider than target aspect ratio (e.g., landscape screen for portrait video)
+      // Fit to height, width will be less than window width (letterbox sides)
+      displayHeight = windowHeight;
+      displayWidth = displayHeight * targetAspectRatio;
+    } else {
+      // Window is taller than or same as target aspect ratio (e.g., portrait screen for portrait video)
+      // Fit to width, height will be less than window height (letterbox top/bottom)
+      displayWidth = windowWidth;
+      displayHeight = displayWidth / targetAspectRatio;
+    }
+
+    // Apply the calculated display size to the canvas style
+    liveRenderTarget.style.width = `${displayWidth}px`;
+    liveRenderTarget.style.height = `${displayHeight}px`;
+
+    // Center the canvas on the screen
+    liveRenderTarget.style.position = 'absolute'; // Ensure positioning context
+    liveRenderTarget.style.left = `${(windowWidth - displayWidth) / 2}px`;
+    liveRenderTarget.style.top = `${(windowHeight - displayHeight) / 2}px`;
   }
 }
