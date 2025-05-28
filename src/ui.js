@@ -1,4 +1,3 @@
-// ui.js
 import { Settings } from "./settings"
 
 export class UIManager {
@@ -89,7 +88,6 @@ export class UIManager {
         const liveRenderTarget = document.getElementById("canvas")
         const currentSource = cameraManager.getSource()
         if (currentSource && liveRenderTarget) {
-          // Pass cameraManager to updateRenderSize
           this.updateRenderSize(currentSource, liveRenderTarget, cameraManager)
         }
       }
@@ -106,24 +104,21 @@ export class UIManager {
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    const streamDim = cameraManager.getStreamDimensions();
-    const streamWidth = streamDim.width;
-    const streamHeight = streamDim.height;
+    const streamDim = cameraManager.getStreamDimensions(); // This now gets potentially delayed-updated dimensions
+    let streamWidth = streamDim.width;
+    let streamHeight = streamDim.height;
 
+    // If dimensions are still fallback (e.g., 1280x720), and we expect them to be different (e.g., portrait mobile)
+    // we might need a more robust way to get actual dimensions, or a delay for them to be reported.
+    // For now, proceed with what cameraManager provides.
     if (streamWidth === 0 || streamHeight === 0) {
-        console.error("Stream dimensions are zero. Canvas sizing might be incorrect.");
-        // Fallback to prevent division by zero or incorrect aspect ratio
-        // This part might need adjustment based on how often stream dimensions are zero
-        // For now, if they are zero, we'll just make canvas fill screen, which might stretch
-        liveRenderTarget.width = viewportWidth;
-        liveRenderTarget.height = viewportHeight;
-        liveRenderTarget.style.width = `${viewportWidth}px`;
-        liveRenderTarget.style.height = `${viewportHeight}px`;
-        liveRenderTarget.style.top = '0px';
-        liveRenderTarget.style.left = '0px';
-        source.setRenderSize(viewportWidth, viewportHeight);
-        return;
+        console.error("Stream dimensions are zero or fallback defaults. Canvas sizing might be incorrect or use defaults.");
+        // If dimensions are truly zero, use viewport as a last resort, which might stretch
+        // but is better than crashing.
+        streamWidth = streamWidth === 0 ? viewportWidth : streamWidth;
+        streamHeight = streamHeight === 0 ? viewportHeight : streamHeight;
     }
+
 
     const streamAspectRatio = streamWidth / streamHeight;
     const viewportAspectRatio = viewportWidth / viewportHeight;
@@ -131,26 +126,27 @@ export class UIManager {
     let displayWidth;
     let displayHeight;
 
+    // Determine display dimensions to fit and maintain aspect ratio
     if (streamAspectRatio > viewportAspectRatio) {
-      // Stream is wider than viewport (letterbox)
+      // Stream is wider than viewport (needs letterboxing: black bars top/bottom)
       displayWidth = viewportWidth;
       displayHeight = viewportWidth / streamAspectRatio;
     } else {
-      // Stream is taller or same aspect as viewport (pillarbox)
+      // Stream is taller or same aspect as viewport (needs pillarboxing: black bars left/right)
       displayHeight = viewportHeight;
       displayWidth = viewportHeight * streamAspectRatio;
     }
 
-    // Set canvas drawing buffer size to actual stream dimensions
+    // Set canvas drawing buffer size to actual stream dimensions (or our best guess from cameraManager)
     liveRenderTarget.width = streamWidth;
     liveRenderTarget.height = streamHeight;
 
-    // Set canvas CSS display size to fit viewport while maintaining aspect ratio
+    // Set canvas CSS display size
     liveRenderTarget.style.width = `${displayWidth}px`;
     liveRenderTarget.style.height = `${displayHeight}px`;
 
     // Center the canvas
-    liveRenderTarget.style.position = 'absolute';
+    liveRenderTarget.style.position = 'absolute'; // Ensure it's 'absolute' for top/left to work
     liveRenderTarget.style.top = `${(viewportHeight - displayHeight) / 2}px`;
     liveRenderTarget.style.left = `${(viewportWidth - displayWidth) / 2}px`;
 
@@ -158,8 +154,8 @@ export class UIManager {
     source.setRenderSize(streamWidth, streamHeight);
     
     console.log(`Viewport: ${viewportWidth}x${viewportHeight} (AR: ${viewportAspectRatio.toFixed(2)})`);
-    console.log(`Stream: ${streamWidth}x${streamHeight} (AR: ${streamAspectRatio.toFixed(2)})`);
+    console.log(`Stream (from cameraManager): ${streamWidth}x${streamHeight} (AR: ${streamAspectRatio.toFixed(2)})`);
     console.log(`Canvas Buffer: ${liveRenderTarget.width}x${liveRenderTarget.height}`);
-    console.log(`Canvas Display: ${displayWidth.toFixed(2)}x${displayHeight.toFixed(2)}, Top: ${liveRenderTarget.style.top}, Left: ${liveRenderTarget.style.left}`);
+    console.log(`Canvas Display: ${displayWidth.toFixed(0)}x${displayHeight.toFixed(0)}, Top: ${liveRenderTarget.style.top}, Left: ${liveRenderTarget.style.left}`);
   }
 }
