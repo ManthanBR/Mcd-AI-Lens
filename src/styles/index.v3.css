@@ -9,8 +9,9 @@ body {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vw;
+  height: 100vh; /* <-- ADDED/MODIFIED: Ensure canvas element fills viewport height */
   z-index: 1;
+  display: block; /* <-- ADDED: Good practice for canvas to avoid potential extra space */
 }
 
 .poweredbysnap-logo {
@@ -198,15 +199,19 @@ body {
 
 #loading {
   position: absolute;
-  top: 30%;
-  left: 40%;
-  z-index: 900;
-  display: none; /* Hidden by default */
+  top: 50%; /* MODIFIED for better centering */
+  left: 50%; /* MODIFIED for better centering */
+  transform: translate(-50%, -50%); /* MODIFIED for better centering */
+  z-index: 1001; /* Ensure it's above other controls if shown during crucial ops */
+  display: none; /* Hidden by default, JS changes to 'flex' */
+  /* If #loading is a flex container for loading-icon: */
+  /* justify-content: center; */
+  /* align-items: center; */
 }
 
-#loading-icon {
-  height: 200px;
-  width: 200px;
+#loading-icon { /* This is the <img> tag */
+  height: 150px; /* Adjusted size, 200px might be very large */
+  width: 150px;
   animation: spin 2s linear infinite; /* Apply the spin animation */
 }
 
