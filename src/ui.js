@@ -108,8 +108,6 @@ export class UIManager {
 
     liveRenderTarget.width = width // Set canvas buffer size
     liveRenderTarget.height = height
-    liveRenderTarget.style.width = `${width}px` // Set canvas display size
-    liveRenderTarget.style.height = `${height}px`
     
     source.setRenderSize(width, height)
   }
