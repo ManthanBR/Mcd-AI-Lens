@@ -86,8 +86,7 @@ export class CameraManager {
         ? (this.isBackFacing ? Settings.camera.constraints.back : Settings.camera.constraints.front)
         : Settings.camera.constraints.desktop;
 
-    // Example: Requesting a specific aspect ratio or resolution (uncomment and adapt if needed)
-    /*
+
     if (baseConstraints.video && typeof baseConstraints.video === 'object') {
         baseConstraints.video.width = { ideal: 1280 };
         baseConstraints.video.height = { ideal: 720 };
@@ -95,7 +94,7 @@ export class CameraManager {
     } else if (baseConstraints.video === true) {
         baseConstraints.video = { width: { ideal: 1280 }, height: { ideal: 720 } };
     }
-    */
+    
     return baseConstraints;
   }
 
