@@ -12,6 +12,7 @@ body {
   width: 100%; /* Make body fill html width */
   height: 100%; /* Make body fill html height */
   overflow: hidden; /* This was already correctly set */
+  background-color: rgb(26, 26, 26);
 }
 
 #canvas {
