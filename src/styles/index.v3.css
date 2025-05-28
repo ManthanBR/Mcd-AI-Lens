@@ -16,13 +16,9 @@ body {
 
 #canvas {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100vw; /* Viewport width */
-  height: 100vh; /* Viewport height - THIS IS THE KEY ADDITION/CHANGE */
+  /* top, left, width, height will be set by JavaScript to maintain aspect ratio */
   z-index: 1;
-  /* For debugging, you can add a border to see the canvas bounds: */
-  /* border: 3px solid red; */
+  background-color: black; /* Shows as black bars if letterboxed/pillarboxed */
 }
 
 /* ... rest of your CSS ... */
