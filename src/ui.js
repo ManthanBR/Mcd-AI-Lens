@@ -103,8 +103,8 @@ export class UIManager {
         console.warn("updateRenderSize called with invalid source or liveRenderTarget.");
         return;
     }
-    const width = 1080
-    const height = 1920
+    const width = window.innerWidth
+    const height = window.innerHeight
 
     liveRenderTarget.width = width // Set canvas buffer size
     liveRenderTarget.height = height
