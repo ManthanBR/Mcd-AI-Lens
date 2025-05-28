@@ -7,7 +7,7 @@
  */
 
 import { bootstrapCameraKit, createMediaStreamSource, Transform2D } from "@snap/camera-kit"
-import "./styles/index.v3.css"
+import "./styles/index.v3.css" // Make sure this path is correct
 import { CameraManager } from "./camera"
 import { MediaRecorderManager } from "./recorder"
 import { UIManager } from "./ui"
@@ -21,17 +21,21 @@ import { Settings } from "./settings"
 
   if (!apiToken || !lensID || !groupID) {
     console.error("Missing required environment variables. Please check your environment settings.")
-    // Display error to user in a more friendly way if possible
     const loadingElement = document.getElementById("loading")
-    if (loadingElement) loadingElement.innerHTML = "Configuration error. Please check console."
+    if (loadingElement) {
+        loadingElement.innerHTML = "Configuration error. Please check console."
+        loadingElement.style.display = "flex"; // Make sure it's visible
+        loadingElement.style.color = "red";
+        loadingElement.style.textAlign = "center";
+        loadingElement.style.padding = "20px";
+    }
     return
   }
 
   // Initialize managers
   const cameraManager = new CameraManager()
-  const uiManager = new UIManager() // UIManager dependencies will be set later if needed, or passed to methods
+  const uiManager = new UIManager()
   const videoProcessor = new VideoProcessor()
-  // Pass cameraManager to MediaRecorderManager constructor
   const mediaRecorder = new MediaRecorderManager(videoProcessor, uiManager, cameraManager)
 
 
@@ -48,17 +52,20 @@ import { Settings } from "./settings"
 
   // Initialize camera and set up source
   const mediaStream = await cameraManager.initializeCamera()
-  const initialSource = createMediaStreamSource(mediaStream, { // Renamed to initialSource for clarity
+  const initialSource = createMediaStreamSource(mediaStream, {
     cameraType: cameraManager.isBackFacing ? "environment" : "user",
-    disableSourceAudio: false, // Ensure audio is not disabled for the source
+    disableSourceAudio: false,
   })
-  cameraManager.currentSource = initialSource // Store initial source in CameraManager
+  cameraManager.currentSource = initialSource
   await session.setSource(initialSource)
 
   if (!cameraManager.isBackFacing) {
     initialSource.setTransform(Transform2D.MirrorX)
   }
-  // SetRenderSize will be called by uiManager.updateRenderSize
+  
+  // Set initial render size for the source (as per original logic)
+  await initialSource.setRenderSize(window.innerWidth, window.innerHeight); 
+
   await session.setFPSLimit(Settings.camera.fps)
   await session.play()
 
@@ -69,45 +76,37 @@ import { Settings } from "./settings"
   // Set up event listeners
   uiManager.recordButton.addEventListener("click", async () => {
     if (uiManager.recordPressedCount % 2 === 0) {
-      // Pass cameraManager instance to startRecording
       const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager)
       if (success) {
         uiManager.updateRecordButtonState(true)
-      } else {
-        // If starting failed, reset UI relevant parts (e.g. recordPressedCount)
-        // uiManager.recordPressedCount may need to be handled carefully if start fails
       }
     } else {
       uiManager.updateRecordButtonState(false)
-      uiManager.toggleRecordButton(false) // This hides the record button after stopping
+      uiManager.toggleRecordButton(false)
       mediaRecorder.stopRecording()
     }
   })
 
   uiManager.switchButton.addEventListener("click", async () => {
     try {
-      // cameraManager.updateCamera updates cameraManager.mediaStream and cameraManager.currentSource
       const newSource = await cameraManager.updateCamera(session)
-      uiManager.updateRenderSize(newSource, liveRenderTarget)
+      // Call updateRenderSize AFTER the new source is set and played by updateCamera
+      // and ensure the newSource is passed to updateRenderSize.
+      // updateCamera should set cameraManager.currentSource = newSource
+      uiManager.updateRenderSize(newSource, liveRenderTarget) // Pass the new source
 
-      // If recording, switch the audio track for the MediaRecorder
       if (mediaRecorder.isRecording()) {
-        mediaRecorder.switchCameraAudio(cameraManager.mediaStream) // Use the new mediaStream from cameraManager
+        mediaRecorder.switchCameraAudio(cameraManager.mediaStream)
       }
     } catch (error) {
       console.error("Error switching camera:", error)
-      // Potentially inform the user
     }
   })
-
-  // The back-button's onclick is now primarily managed within UIManager.displayPostRecordButtons
-  // to ensure it has access to necessary instances for resetting state.
 
   // Add window resize listener
   window.addEventListener("resize", () => uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget))
 
-  // Update initial render size
+  // Update initial render size using UIManager (this will set styles)
   uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget)
-  // Hide loading icon once everything is ready
-  uiManager.showLoading(false);
+  uiManager.showLoading(false); // Hide loading icon once everything is ready
 })()
