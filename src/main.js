@@ -60,27 +60,40 @@ const source = createMediaStreamSource(mediaStream, {
   await session.applyLens(lens)
 
   // Set up event listeners
-  uiManager.recordButton.addEventListener("click", async () => {
-    if (uiManager.recordPressedCount % 2 === 0) {
-      const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
-      if (success) {
-        uiManager.updateRecordButtonState(true)
-      }
-    } else {
-      uiManager.updateRecordButtonState(false)
-      uiManager.toggleRecordButton(false)
-      mediaRecorder.stopRecording()
+uiManager.recordButton.addEventListener("click", async () => {
+  if (uiManager.recordPressedCount % 2 === 0) {
+    const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
+    if (success) {
+      uiManager.updateRecordButtonState(true)
     }
-  })
+  } else {
+    uiManager.updateRecordButtonState(false)
+    uiManager.toggleRecordButton(false)
+    uiManager.showLoading(true)
+    await mediaRecorder.finalizeRecording()
+  }
+})
 
-  uiManager.switchButton.addEventListener("click", async () => {
-    try {
-      const source = await cameraManager.updateCamera(session)
-      uiManager.updateRenderSize(source, liveRenderTarget)
-    } catch (error) {
-      console.error("Error switching camera:", error)
+
+uiManager.switchButton.addEventListener("click", async () => {
+  try {
+    if (mediaRecorder.mediaRecorder?.state === "recording") {
+      mediaRecorder.stopRecording()
+      await new Promise(resolve => setTimeout(resolve, 500)) // Ensure .onstop finishes
     }
-  })
+
+    const source = await cameraManager.updateCamera(session)
+    uiManager.updateRenderSize(source, liveRenderTarget)
+
+    const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
+    if (!success) {
+      console.error("Failed to resume recording after camera switch.")
+    }
+  } catch (error) {
+    console.error("Error switching camera while recording:", error)
+  }
+})
+
 
   // Add back button handler
   document.getElementById("back-button").addEventListener("click", async () => {
