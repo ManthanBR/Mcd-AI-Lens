@@ -60,27 +60,30 @@ const source = createMediaStreamSource(mediaStream, {
   await session.applyLens(lens)
 
   // Set up event listeners
-  uiManager.recordButton.addEventListener("click", async () => {
-    if (uiManager.recordPressedCount % 2 === 0) {
-      const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
-      if (success) {
-        uiManager.updateRecordButtonState(true)
-      }
-    } else {
-      uiManager.updateRecordButtonState(false)
-      uiManager.toggleRecordButton(false)
-      mediaRecorder.stopRecording()
+uiManager.recordButton.addEventListener("click", async () => {
+  if (uiManager.recordPressedCount % 2 === 0) {
+    const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager.getConstraints())
+    if (success) {
+      uiManager.updateRecordButtonState(true)
     }
-  })
+  } else {
+    uiManager.updateRecordButtonState(false)
+    uiManager.toggleRecordButton(false)
+    await mediaRecorder.finalizeRecording()
+  }
+})
 
-  uiManager.switchButton.addEventListener("click", async () => {
-    try {
-      const source = await cameraManager.updateCamera(session)
-      uiManager.updateRenderSize(source, liveRenderTarget)
-    } catch (error) {
-      console.error("Error switching camera:", error)
-    }
-  })
+
+uiManager.switchButton.addEventListener("click", async () => {
+  try {
+    await mediaRecorder.switchCameraSegment()
+    const source = await cameraManager.updateCamera(session)
+    uiManager.updateRenderSize(source, liveRenderTarget)
+  } catch (error) {
+    console.error("Camera switch error:", error)
+  }
+})
+
 
   // Add back button handler
   document.getElementById("back-button").addEventListener("click", async () => {
