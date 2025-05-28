@@ -1,16 +1,31 @@
+html {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Prevent scrollbars on the html element */
+}
+
 body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  width: 100%; /* Make body fill html width */
+  height: 100%; /* Make body fill html height */
+  overflow: hidden; /* This was already correctly set */
 }
 
 #canvas {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
+  width: 100vw; /* Viewport width */
+  height: 100vh; /* Viewport height - THIS IS THE KEY ADDITION/CHANGE */
   z-index: 1;
+  /* For debugging, you can add a border to see the canvas bounds: */
+  /* border: 3px solid red; */
 }
+
+/* ... rest of your CSS ... */
 
 .poweredbysnap-logo {
   width: auto; /* Set to auto to avoid stretching */
@@ -38,9 +53,9 @@ body {
 
 #outline {
   position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
+  /* bottom: 10%; /* These are defined with #record-button, let's keep them there */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
   height: var(--button-size, 200px); /* Default for mobile */
   width: var(--button-size, 200px);
   border: none;
@@ -48,11 +63,21 @@ body {
   transition: background-color 0.2s ease;
 }
 
-#record-button {
-  position: absolute;
-  bottom: 10%;
+/* Combined #outline and #record-button common positioning */
+#controls #outline,
+#controls #record-button {
+  position: absolute; /* relative to #controls if needed, or keep as is if #controls is just a conceptual container */
+  bottom: 0; /* Position relative to #controls bottom */
   left: 50%;
   transform: translateX(-50%);
+}
+
+
+#record-button {
+  /* position: absolute; */ /* Handled above */
+  /* bottom: 10%; */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
   height: var(--button-size, 200px); /* Default for mobile */
   width: var(--button-size, 200px);
   background-image: url("../assets/RecordButton.png");
@@ -85,15 +110,15 @@ body {
 
 #back-button-container {
   position: absolute;
-  top: 2%;
-  left: 3%;
+  top: 2%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-top) */
+  left: 3%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-left) */
   z-index: 1000;
 }
 
 #back-button {
   transform: none;
   background-color: transparent;
-  height: 100px;
+  height: 100px; /* Consider slightly smaller for easier tapping without overlap */
   width: 100px;
   color: transparent;
   border: none;
@@ -110,6 +135,7 @@ body {
   max-width: 100%;
   max-height: 100%;
   height: auto;
+  display: block; /* Prevents extra space below image */
 }
 
 #back-button:active {
@@ -136,6 +162,7 @@ body {
   max-width: 100%;
   max-height: 100%;
   height: auto;
+  display: block;
 }
 
 #share-button:active {
@@ -162,6 +189,7 @@ body {
   max-width: 100%;
   max-height: 100%;
   height: auto;
+  display: block;
 }
 
 #download-button:active {
@@ -170,8 +198,8 @@ body {
 
 #switch-cam {
   position: absolute;
-  top: 3%;
-  right: 5%;
+  top: 3%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-top) */
+  right: 5%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-right) */
   z-index: 950;
 }
 
@@ -196,17 +224,23 @@ body {
 }
 
 #loading {
-  position: absolute;
-  top: 30%;
-  left: 40%;
-  z-index: 900;
+  position: fixed; /* Use fixed to ensure it's viewport relative and stays centered */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center it properly */
+  z-index: 1001; /* Above everything else */
   display: none; /* Hidden by default */
+  /* Added for better visibility if it has no background */
+  /* background-color: rgba(0,0,0,0.1); 
+     padding: 20px; 
+     border-radius: 10px; */
 }
 
 #loading-icon {
-  height: 200px;
-  width: 200px;
+  height: 100px; /* Made it a bit smaller */
+  width: 100px;
   animation: spin 2s linear infinite; /* Apply the spin animation */
+  display: block; /* if it's an img */
 }
 
 /* Keyframes for the rotation */
