@@ -25,7 +25,7 @@ export class MediaRecorderManager {
       const displayStream = await navigator.mediaDevices.getDisplayMedia({
         video: true, // Often required to get tab audio option, will provide a black/dummy video track
         audio: true, // Request audio
-        // preferCurrentTab: true, // Good hint for Chrome/Edge to default/suggest current tab
+        preferCurrentTab: true, // Good hint for Chrome/Edge to default/suggest current tab
         // systemAudio: 'include', // another option, but preferCurrentTab is more specific for tab audio
       })
 
