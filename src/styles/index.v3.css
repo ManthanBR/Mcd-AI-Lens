@@ -1,215 +1,220 @@
-body {
+/* Global reset and box-sizing */
+html {
+  height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  box-sizing: border-box;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: inherit;
+}
+
+body {
+  height: 100%; /* Make body take full height of html */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* This clips anything outside the viewport, which is desired for a full-screen app */
+  position: relative; /* Establishes a positioning context for absolute children if needed, good practice */
+  font-family: sans-serif; /* Example: Set a default font */
 }
 
 #canvas {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  z-index: 1;
+  /* The UIManager.updateRenderSize function in ui.js will set:
+     - canvas.width and canvas.height (drawing buffer size)
+     - canvas.style.width and canvas.style.height (CSS display size)
+     to window.innerWidth and window.innerHeight respectively.
+     This is generally the most reliable way for full-screen canvas.
+  */
+  display: block; /* Remove potential extra space below if it were inline */
+  z-index: 1; /* Base layer for the camera feed */
 }
 
 .poweredbysnap-logo {
-  width: auto; /* Set to auto to avoid stretching */
-  position: absolute; /* Position relative to the viewport */
-  bottom: -40px; /* Adjust to desired distance from the bottom */
-  left: 40px; /* Adjust to desired distance from the left */
+  width: auto;
+  position: absolute;
+  bottom: 20px; /* Adjusted from -40px to be visible */
+  left: 20px;  /* Adjusted from 40px for typical padding */
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Align content within the element to the left */
+  justify-content: flex-start;
   z-index: 900;
 }
 
 .poweredbysnap-logo > img {
-  width: 180px;
+  width: 150px; /* Slightly smaller for better fit */
+  height: auto;
 }
 
 #controls {
   position: absolute;
-  bottom: 10%;
+  bottom: 5%; /* Adjusted for a bit more space from edge */
   width: 100%;
   display: flex;
   justify-content: center;
+  align-items: center; /* Ensure vertical alignment if items have different heights */
   z-index: 999;
 }
 
 #outline {
   position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  height: var(--button-size, 200px); /* Default for mobile */
-  width: var(--button-size, 200px);
+  /* bottom: 10%; Centered by #controls container now */
+  /* left: 50%; Centered by #controls container now */
+  /* transform: translateX(-50%); No longer needed due to flex centering in #controls */
+  height: var(--button-size, 100px); /* Unified size with record-button, adjust as needed */
+  width: var(--button-size, 100px);
+  /* background-image: url("../assets/RecordOutline.png"); Set via JS or direct img element */
+  /* background-size: cover; */
   border: none;
-  z-index: 900;
-  transition: background-color 0.2s ease;
+  z-index: 900; /* Below record button if it's a separate visual element */
+  /* This element is an <img> in HTML, so style it as such if it's the outline image */
 }
 
 #record-button {
-  position: absolute;
-  bottom: 10%;
-  left: 50%;
-  transform: translateX(-50%);
-  height: var(--button-size, 200px); /* Default for mobile */
-  width: var(--button-size, 200px);
+  /* position: absolute; No longer needed if #controls is flex center */
+  /* bottom: 10%; */
+  /* left: 50%; */
+  /* transform: translateX(-50%); */
+  height: var(--button-size, 80px); /* Example size, adjust as needed */
+  width: var(--button-size, 80px);
   background-image: url("../assets/RecordButton.png");
-  background-size: cover;
+  background-size: contain; /* Use contain to ensure the whole image is visible */
   background-position: center;
   background-repeat: no-repeat;
   background-color: transparent;
   border-radius: 50%;
   border: none;
   z-index: 1000;
-  transition: background-color 0.2s ease;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+  cursor: pointer;
 }
 
-#record-button.pressed {
-  background-color: green; /* Change to green when pressed */
-  content: "Recording..."; /* Optionally add text */
+#record-button:active {
+  transform: scale(0.95); /* Slight press effect */
 }
+
+/* The .pressed class for background color change seems to be missing from your JS logic.
+   The background image is changed directly in updateRecordButtonState.
+#record-button.pressed {
+  background-color: green;
+}
+*/
 
 #action-buttons {
   position: absolute;
-  bottom: 20%; /* Adjust the distance from the bottom of the screen */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%); /* Offset by half the width and height */
-  display: flex; /* Enables flex layout */
-  justify-content: center; /* Aligns buttons horizontally */
-  align-items: center; /* Aligns buttons vertically */
-  z-index: 1000; /* Ensure visibility above other elements */
-  flex-wrap: wrap; /* Allows wrapping if container width is too small */
+  bottom: 10%; /* Adjusted for consistency */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px; /* Adds space between buttons */
+  z-index: 1000;
+  /* flex-wrap: wrap; (already there, good) */
 }
 
 #back-button-container {
   position: absolute;
-  top: 2%;
-  left: 3%;
+  top: 20px; /* Consistent spacing */
+  left: 20px;  /* Consistent spacing */
   z-index: 1000;
 }
 
-#back-button {
-  transform: none;
+.button-class { /* Common styles for image buttons */
   background-color: transparent;
-  height: 100px;
-  width: 100px;
-  color: transparent;
   border: none;
   cursor: pointer;
   user-select: none;
   outline: none;
-  padding: 0%;
+  padding: 0;
   transition: transform 0.15s ease-in-out;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
-}
-#back-button img {
-  /* Add this if your button uses an image */
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
+  display: flex; /* For centering image if needed */
+  align-items: center;
+  justify-content: center;
 }
 
-#back-button:active {
-  transform: translate(2px, 2px);
+.button-class img {
+  display: block; /* Remove extra space under image */
+  max-width: 100%;
+  max-height: 100%;
+  height: auto; /* Maintain aspect ratio */
 }
+
+.button-class:active {
+  transform: scale(0.90); /* Common active state for all buttons */
+}
+
+
+#back-button {
+  /* transform: none; (active state will handle transform) */
+  height: 50px; /* Adjust size as needed */
+  width: 50px;
+}
+/* :active styles are now handled by .button-class:active, or can be more specific if needed */
+/* #back-button:active { transform: translate(2px, 2px); } */
+
 
 #share-button {
-  height: 150px;
-  width: 150px;
-  background-color: transparent;
-  transform: translate(-25%, 0);
-  color: transparent;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  padding: 0%;
-  transition: transform 0.15s ease-in-out;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
+  height: 70px; /* Adjust size */
+  width: 70px;
+  /* transform: translate(-25%, 0); Removed, let gap in #action-buttons handle spacing */
 }
-
-#share-button img {
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-}
-
-#share-button:active {
-  transform: translate(calc(-25% + 2px), 2px);
-}
+/* #share-button:active { transform: translate(calc(-25% + 2px), 2px); } */
 
 #download-button {
-  height: 150px;
-  width: 150px;
-  background-color: transparent;
-  transform: translate(25%, 0);
-  color: transparent;
-  border: none;
-  cursor: pointer;
-  user-select: none;
-  outline: none;
-  padding: 0%;
-  transition: transform 0.15s ease-in-out;
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
+  height: 70px; /* Adjust size */
+  width: 70px;
+  /* transform: translate(25%, 0); Removed, let gap in #action-buttons handle spacing */
 }
+/* #download-button:active { transform: translate(calc(25% + 2px), 2px); } */
 
-#download-button img {
-  max-width: 100%;
-  max-height: 100%;
-  height: auto;
-}
-
-#download-button:active {
-  transform: translate(calc(25% + 2px), 2px);
-}
 
 #switch-cam {
   position: absolute;
-  top: 3%;
-  right: 5%;
+  top: 20px;  /* Consistent spacing */
+  right: 20px; /* Consistent spacing */
   z-index: 950;
 }
 
-#switch-button {
-  height: 70px;
-  width: 70px;
-  background-image: url("../assets/SwitchButton.png"); /* Green background */
-  background-size: contain; /* Ensure the image covers the button */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Preent tiling */
-  background-color: transparent;
-  border: none;
-  user-select: none; /* Disable text selection */
-  outline: none;
-  transition: transform 0.2s ease; /* Smooth hover animation */
-  -webkit-tap-highlight-color: transparent;
-  -webkit-touch-callout: none;
+#switch-button { /* This already has .button-class from HTML */
+  height: 50px; /* Adjust size */
+  width: 50px;
+  background-image: url("../assets/SwitchButton.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
+  /* background-color: transparent; (from .button-class) */
+  /* border: none; (from .button-class) */
 }
+/* #switch-button:active { transform: translate(5%, 5%); } Covered by .button-class:active (scale) */
 
-#switch-button:active {
-  transform: translate(5%, 5%); /* Only scale without affecting translation */
-}
 
 #loading {
-  position: absolute;
-  top: 30%;
-  left: 40%;
-  z-index: 900;
-  display: none; /* Hidden by default */
+  position: fixed; /* Use fixed to ensure it's viewport-relative even if body scrolls (though it shouldn't) */
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: none; /* Hidden by default, JS toggles to 'flex' */
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.5); /* Optional: semi-transparent overlay */
+  z-index: 2000; /* Highest z-index */
 }
 
 #loading-icon {
-  height: 200px;
-  width: 200px;
-  animation: spin 2s linear infinite; /* Apply the spin animation */
+  height: 100px; /* Adjust size */
+  width: 100px;
+  animation: spin 1s linear infinite; /* Faster spin */
 }
 
-/* Keyframes for the rotation */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -220,28 +225,36 @@ body {
 }
 
 /* Desktop-specific styles */
+/* Consider using @media (min-width: 768px) for desktop styles for more flexibility */
 .desktop #outline,
 .desktop #record-button {
-  height: 70px;
-  width: 70px;
+  /* Sizes for record button elements on desktop */
+  --button-size: 70px; /* Use the CSS variable for consistency */
 }
 
-.desktop #share-button {
-  height: 70px;
-  width: 70px;
-}
-
+.desktop #share-button,
 .desktop #download-button {
-  height: 70px;
-  width: 70px;
+  height: 60px;
+  width: 60px;
 }
 
-.desktop #back-button {
-  height: 50px;
-  width: 50px;
+.desktop #back-button,
+.desktop #switch-button {
+  height: 40px;
+  width: 40px;
 }
 
 /* Hide switch button on desktop */
 .desktop #switch-cam {
   display: none;
+}
+
+/* Mobile specific adjustments if needed (example) */
+@media (max-width: 767px) {
+  /* You can adjust --button-size for mobile if the default isn't right */
+  /* #outline, #record-button { --button-size: 80px; } */
+
+  .poweredbysnap-logo > img {
+    width: 120px; /* Smaller logo on smaller screens */
+  }
 }
