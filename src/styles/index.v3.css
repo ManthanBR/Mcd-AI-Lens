@@ -24,29 +24,26 @@ body {
   z-index: 1;
 }
 
-/* Start Screen Styles - Yellow Background, Red Text Theme with Frame Shadow & Refined Spacing */
+/* Start Screen Styles - Fullscreen Frame Theme */
 #start-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  display: flex;
+  display: flex; /* To center the inner content box if it were smaller, but it will be full size */
   justify-content: center;
   align-items: center;
-  /* Padding for the outermost yellow frame. The shadow will be outside this. */
-  /* We'll use margin on start-screen-content for the frame thickness now. */
-  padding: 15px; /* Reduced padding, as shadow needs space outside */
+  padding: 0; /* No padding on the outer container */
   box-sizing: border-box;
   z-index: 2000;
-  /* The actual background for the visible frame parts is now on start-screen-content */
+  /* This outer div doesn't need a background if #start-screen-content is full */
 }
 
 #start-screen-content {
-  width: calc(100% - 30px); /* Adjust width to account for start-screen padding */
-  height: calc(100% - 30px); /* Adjust height to account for start-screen padding */
-  max-width: 450px; /* Max width for the content area on larger screens */
-  max-height: 800px; /* Max height for the content area */
+  width: 100%; /* Fill the entire #start-screen */
+  height: 100%; /* Fill the entire #start-screen */
+  /* No max-width or max-height here if we want it truly fullscreen */
 
   background-color: #FFC72C; /* McDonald's Yellow for the main background */
   color: #DB0007; /* McDonald's Red for text */
@@ -55,26 +52,26 @@ body {
   justify-content: center; /* Center vertically */
   align-items: center;
   text-align: center;
-  padding: 20px; /* Padding inside the yellow content area */
+  padding: 25px; /* Padding inside the yellow content area FOR THE CONTENT, NOT THE FRAME */
   box-sizing: border-box;
-  border: 10px solid #DB0007; /* Inner frame color: McDonald's Red */
-  border-radius: 30px; /* Rounded corners for the yellow content area + red border */
-  overflow-y: auto;
-  box-shadow: 0px 0px 25px 5px rgba(0, 0, 0, 0.35); /* FRAME SHADOW */
-  position: relative; /* Needed for any absolute positioning inside if required later */
+  border: 12px solid #DB0007; /* Red border becomes the frame edge */
+  border-radius: 35px; /* Rounded corners for the yellow content area + red border */
+  overflow-y: auto; /* Allow scrolling if content is too tall for screen height */
+  box-shadow: 0px 0px 30px 8px rgba(0, 0, 0, 0.4); /* FRAME SHADOW - slightly stronger */
+  position: relative;
 }
 
 #logo-placeholder {
-  max-width: 160px;
-  max-height: 160px;
-  margin-top: 10px;    /* Space from top of content box */
-  margin-bottom: 15px; /* Space below logo */
+  max-width: 150px; /* Adjusted for a more compact look */
+  max-height: 150px;
+  margin-top: 5vh;    /* Use viewport height for responsive top margin */
+  margin-bottom: 2vh; /* Space below logo */
 }
 
 #start-screen h1 {
-  font-size: 2.8em; /* Adjusted for spacing */
+  font-size: clamp(2.2em, 7vw, 3.2em); /* Responsive font size */
   margin-top: 0;
-  margin-bottom: 25px; /* Space below H1, before button */
+  margin-bottom: 3vh; /* Space below H1, before button */
   font-weight: 900;
   color: #DB0007;
   line-height: 1.1;
@@ -83,21 +80,21 @@ body {
 }
 
 #start-screen button {
-  padding: 18px 35px;
-  font-size: 1.7em; /* Slightly smaller to balance */
+  padding: 15px 30px; /* Adjusted padding */
+  font-size: clamp(1.4em, 5vw, 1.8em); /* Responsive font size */
   font-weight: 900;
   color: #FFC72C;
   background-color: #DB0007;
-  border: 3px solid #FFC72C;
+  border: 3px solid #FFC72C; /* Kept for visual pop, can be removed if button should blend more */
   border-radius: 50px;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   text-transform: uppercase;
   min-width: auto;
   width: fit-content;
-  max-width: 80%;
-  margin-top: 0; /* H1 margin-bottom will handle space */
-  margin-bottom: 20px; /* Space below button, before permission status */
+  max-width: 70%;
+  margin-top: 0;
+  margin-bottom: 4vh; /* Space below button */
   box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
 }
@@ -128,18 +125,19 @@ body {
 }
 
 #permission-status {
-  margin-top: auto; /* Pushes to the bottom if space allows, but respects button margin */
-  padding-bottom: 5px; /* Small padding at the very bottom */
-  font-size: 1.0em; /* Slightly smaller to be less prominent */
+  margin-top: auto; /* Pushes to the bottom */
+  padding-bottom: 2vh; /* Small padding at the very bottom */
+  font-size: clamp(0.9em, 2.5vw, 1.1em); /* Responsive font size */
   color: #DB0007;
   font-weight: 700;
   max-width: 90%;
   line-height: 1.3;
-  text-shadow: 1px 1px 0px rgba(255,255,255,0.2); /* Lighter shadow */
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.2);
 }
 
 
 /* --- REST OF YOUR EXISTING CSS (Unchanged from previous version) --- */
+/* ... (keep the rest of your CSS from .poweredbysnap-logo downwards the same) ... */
 
 .poweredbysnap-logo {
   width: auto;
