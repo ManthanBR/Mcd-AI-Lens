@@ -42,14 +42,15 @@ body {
   align-items: center;
   text-align: center;
   z-index: 2000; /* Above everything else */
-  padding: 20px;
+  padding: 20px 15px; /* Adjusted padding for sides */
   box-sizing: border-box;
+  overflow-y: auto; /* Allow scrolling if content overflows on very small screens */
 }
 
 #logo-placeholder {
-  max-width: 180px; /* Increased from 150px */
-  max-height: 180px; /* Increased from 150px */
-  margin-bottom: 35px; /* Increased from 30px for a bit more space */
+  max-width: 220px; /* Increased from 180px */
+  max-height: 220px; /* Increased from 180px */
+  margin-bottom: 30px; /* Adjusted from 35px, might need tweaking based on overall balance */
   /* For a circular placeholder if logo is square/round */
   /* border-radius: 50%;
      background-color: #333;
@@ -59,43 +60,46 @@ body {
 
 
 #start-screen h1 {
-  font-size: 3.2em; /* Increased from 2.8em */
-  margin-bottom: 20px; /* Increased from 15px */
+  font-size: 4em; /* Increased from 3.2em - significantly larger */
+  margin-bottom: 25px; /* Increased from 20px */
   font-weight: 600;
   color: #ffffff;
+  line-height: 1.1; /* Added line-height for taller text */
 }
 
 #start-screen p {
-  font-size: 1.25em; /* Increased from 1.15em */
-  margin-bottom: 40px; /* Increased from 35px */
-  max-width: 85%;
-  line-height: 1.7;
+  font-size: 1.4em; /* Increased from 1.25em */
+  margin-bottom: 45px; /* Increased from 40px */
+  max-width: 90%; /* Allow slightly more width */
+  line-height: 1.6; /* Adjusted from 1.7 */
   color: #b0b0b0; /* Softer color for paragraph */
 }
 
 #start-screen button {
-  padding: 16px 40px; /* Increased padding from 14px 35px */
-  font-size: 1.2em; /* Increased font size from 1.1em */
+  padding: 20px 45px; /* Increased padding from 16px 40px */
+  font-size: 1.45em; /* Increased font size from 1.2em */
   font-weight: 500;
   cursor: pointer;
   background: linear-gradient(145deg, #007bff, #0056b3); /* Gradient background */
   color: white;
   border: none;
-  border-radius: 28px; /* Slightly increased for proportion from 25px */
+  border-radius: 35px; /* Increased from 28px */
   transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
-  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); /* Softer shadow related to button color */
+  box-shadow: 0 5px 12px rgba(0, 123, 255, 0.3); /* Slightly adjusted shadow */
   outline: none; /* Remove default browser outline */
+  min-width: 70%; /* Ensure button takes up good width */
+  max-width: 300px; /* Prevent button from becoming excessively wide on larger "phone" screens */
 }
 
 #start-screen button:hover {
   background: linear-gradient(145deg, #0069d9, #004085); /* Darker gradient on hover */
-  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
-  transform: translateY(-2px); /* Slight lift on hover */
+  box-shadow: 0 7px 15px rgba(0, 123, 255, 0.4);
+  transform: translateY(-3px); /* More pronounced lift */
 }
 
 #start-screen button:active {
   transform: translateY(0px); /* Press down effect */
-  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+  box-shadow: 0 3px 7px rgba(0, 123, 255, 0.3);
 }
 
 #start-screen button:disabled {
@@ -107,11 +111,12 @@ body {
 }
 
 #permission-status {
-  margin-top: 25px; /* Increased from 20px */
-  font-size: 1em; /* Increased from 0.95em */
+  margin-top: 30px; /* Increased from 25px */
+  font-size: 1.1em; /* Increased from 1em */
   color: #ff4d4d; /* Brighter red for errors */
   font-weight: 500;
   max-width: 90%;
+  line-height: 1.4;
 }
 
 
