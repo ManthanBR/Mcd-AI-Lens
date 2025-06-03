@@ -91,7 +91,7 @@ body {
 
 #start-screen button#start-button {
   padding: 15px 30px;
-  font-size: clamp(1.4em, 5vw, 1.8em);
+  font-size: clamp(1.4em, 6vw, 1.8em);
   font-weight: 900;
   color: #FFC72C;
   background-color: #DB0007;
