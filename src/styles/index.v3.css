@@ -13,8 +13,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  /* Body background is now black, the frame will be placed on top by #start-screen */
-  background-color: #000000;
+  background-color: #000000; /* Body background is now black */
 }
 
 #canvas {
@@ -25,7 +24,7 @@ body {
   z-index: 1;
 }
 
-/* Start Screen Styles - Yellow Background, Red Text Theme */
+/* Start Screen Styles - Yellow Background, Red Text Theme with Frame Shadow & Refined Spacing */
 #start-screen {
   position: fixed;
   top: 0;
@@ -35,74 +34,78 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px; /* Space for the outer frame and rounding, can be yellow */
+  /* Padding for the outermost yellow frame. The shadow will be outside this. */
+  /* We'll use margin on start-screen-content for the frame thickness now. */
+  padding: 15px; /* Reduced padding, as shadow needs space outside */
   box-sizing: border-box;
-  background-color: #FFC72C; /* Outer frame color: McDonald's Yellow */
-  border-radius: 40px; /* Rounded corners for the outermost frame */
   z-index: 2000;
+  /* The actual background for the visible frame parts is now on start-screen-content */
 }
 
 #start-screen-content {
-  width: 100%;
-  height: 100%;
-  background-color: #FFC72C; /* Inner content area background: McDonald's Yellow */
+  width: calc(100% - 30px); /* Adjust width to account for start-screen padding */
+  height: calc(100% - 30px); /* Adjust height to account for start-screen padding */
+  max-width: 450px; /* Max width for the content area on larger screens */
+  max-height: 800px; /* Max height for the content area */
+
+  background-color: #FFC72C; /* McDonald's Yellow for the main background */
   color: #DB0007; /* McDonald's Red for text */
   display: flex;
   flex-direction: column;
-  justify-content: center; /* Vertically centers content */
+  justify-content: center; /* Center vertically */
   align-items: center;
   text-align: center;
-  padding: 25px; /* Padding inside the yellow content area */
+  padding: 20px; /* Padding inside the yellow content area */
   box-sizing: border-box;
   border: 10px solid #DB0007; /* Inner frame color: McDonald's Red */
-  border-radius: 25px; /* Slightly less rounded corners for the inner red frame part */
+  border-radius: 30px; /* Rounded corners for the yellow content area + red border */
   overflow-y: auto;
+  box-shadow: 0px 0px 25px 5px rgba(0, 0, 0, 0.35); /* FRAME SHADOW */
+  position: relative; /* Needed for any absolute positioning inside if required later */
 }
 
 #logo-placeholder {
-  max-width: 170px; /* Slightly smaller to accommodate button move */
-  max-height: 170px;
-  margin-bottom: 15px; /* Reduced margin */
-  /* If your logo is an SVG and needs specific coloring:
-     filter: invert(15%) sepia(90%) saturate(5000%) hue-rotate(350deg) brightness(90%) contrast(110%);
-     This is an EXAMPLE filter to make something red-dish. You'll need to adjust.
-  */
+  max-width: 160px;
+  max-height: 160px;
+  margin-top: 10px;    /* Space from top of content box */
+  margin-bottom: 15px; /* Space below logo */
 }
 
 #start-screen h1 {
-  font-size: 3em; /* Adjusted for new layout */
-  margin-top: 0; /* Reset top margin */
-  margin-bottom: 20px; /* Space before button */
+  font-size: 2.8em; /* Adjusted for spacing */
+  margin-top: 0;
+  margin-bottom: 25px; /* Space below H1, before button */
   font-weight: 900;
   color: #DB0007;
-  line-height: 1.15;
+  line-height: 1.1;
   text-transform: uppercase;
-  text-shadow: 1px 1px 0px rgba(255,255,255,0.3); /* Light shadow for red on yellow */
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.3);
 }
 
 #start-screen button {
-  padding: 18px 35px; /* Bigger padding */
-  font-size: 1.8em;   /* Even bigger button text */
+  padding: 18px 35px;
+  font-size: 1.7em; /* Slightly smaller to balance */
   font-weight: 900;
-  color: #FFC72C; /* Yellow text */
-  background-color: #DB0007; /* Red background for button */
-  border: 3px solid #FFC72C; /* Yellow border to make it pop */
-  border-radius: 50px;      /* Pill shape */
+  color: #FFC72C;
+  background-color: #DB0007;
+  border: 3px solid #FFC72C;
+  border-radius: 50px;
   cursor: pointer;
   transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   text-transform: uppercase;
   min-width: auto;
   width: fit-content;
-  max-width: 85%;
-  margin-top: 25px; /* MOVED BUTTON DOWN */
+  max-width: 80%;
+  margin-top: 0; /* H1 margin-bottom will handle space */
+  margin-bottom: 20px; /* Space below button, before permission status */
   box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
 }
 
 #start-screen button:hover {
-  background-color: #c50007; /* Darker red */
-  color: #fff352; /* Brighter yellow text */
-  border-color: #fff352; /* Brighter yellow border */
+  background-color: #c50007;
+  color: #fff352;
+  border-color: #fff352;
   transform: translateY(-2px);
   box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
@@ -115,9 +118,9 @@ body {
 }
 
 #start-screen button:disabled {
-  background-color: #a30005; /* Dull red */
-  color: #d4a200; /* Dull yellow */
-  border-color: #d4a200; /* Dull yellow */
+  background-color: #a30005;
+  color: #d4a200;
+  border-color: #d4a200;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -125,13 +128,14 @@ body {
 }
 
 #permission-status {
-  margin-top: 20px; /* Space above permission status */
-  font-size: 1.1em;
-  color: #DB0007; /* Red error text */
+  margin-top: auto; /* Pushes to the bottom if space allows, but respects button margin */
+  padding-bottom: 5px; /* Small padding at the very bottom */
+  font-size: 1.0em; /* Slightly smaller to be less prominent */
+  color: #DB0007;
   font-weight: 700;
   max-width: 90%;
   line-height: 1.3;
-  text-shadow: 1px 1px 0px rgba(255,255,255,0.3); /* Light shadow for readability */
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.2); /* Lighter shadow */
 }
 
 
