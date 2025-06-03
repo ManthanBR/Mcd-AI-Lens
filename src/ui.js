@@ -106,10 +106,16 @@ export class UIManager {
     const targetCanvasHeight = 1920;
     const targetAspectRatio = targetCanvasWidth / targetCanvasHeight; // Should be 9/16
 
-    // Set the Camera Kit source render size and canvas internal buffer size
+    // Set the Camera Kit source render size. This tells Camera Kit
+    // what resolution to render at internally.
     source.setRenderSize(targetCanvasWidth, targetCanvasHeight);
-    liveRenderTarget.width = targetCanvasWidth;
-    liveRenderTarget.height = targetCanvasHeight;
+
+    // DO NOT set liveRenderTarget.width and liveRenderTarget.height directly
+    // if control has been transferred (e.g., to an OffscreenCanvas by Camera Kit).
+    // Doing so will cause the "Cannot resize canvas after call to transferControlToOffscreen()" error.
+    // The source.setRenderSize() call above should handle the internal bitmap size.
+    // liveRenderTarget.width = targetCanvasWidth; // REMOVE THIS
+    // liveRenderTarget.height = targetCanvasHeight; // REMOVE THIS
 
     // Calculate the display size for the canvas element to fit the screen while maintaining aspect ratio
     const windowWidth = window.innerWidth;
@@ -132,6 +138,7 @@ export class UIManager {
     }
 
     // Apply the calculated display size to the canvas style
+    // This controls how the canvas is displayed on the page, not its internal rendering resolution.
     liveRenderTarget.style.width = `${displayWidth}px`;
     liveRenderTarget.style.height = `${displayHeight}px`;
 
