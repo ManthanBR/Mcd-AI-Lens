@@ -2,18 +2,21 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <title>Mcd RS Meal</title> <meta name="description" content="Made by Filter You" />
+    <title>Mcd RS Meal</title>
+    <meta name="description" content="Made by Filter You" />
     <meta name="robots" content="noindex" />
     <script type="module" src="/src/main.js"></script>
   </head>
 
   <body>
     <div id="start-screen">
-      <img src="../assets/logo.png" alt="App Logo" id="logo-placeholder" />
-      <h1>GET READY FOR YOUR<br/>RANVEER SINGH MEAL!</h1> <!-- Thematic H1 -->
-      <p>Flip your camera to take a selfie with Ranveer Singh & share your moment!</p> <!-- Thematic P -->
-      <button id="start-button">LET'S GO!</button> <!-- Thematic Button Text -->
-      <p id="permission-status" style="display:none;"></p>
+      <div id="start-screen-content"> {/* New wrapper for content */}
+        <img src="../assets/logo.png" alt="App Logo" id="logo-placeholder" />
+        <h1>GET READY FOR YOUR<br/>RANVEER SINGH MEAL!</h1>
+        {/* Paragraph with "Flip your camera..." is REMOVED */}
+        <button id="start-button">LET'S GO!</button>
+        <p id="permission-status" style="display:none;"></p>
+      </div>
     </div>
 
     <div id="main-app-container" style="display: none;">
