@@ -1,210 +1,194 @@
-// main.js
+/**
+ * Camera Kit Web Demo with Recording Feature
+ * Created by gowaaa (https://www.gowaaa.com)
+ * A creative technology studio specializing in AR experiences
+ *
+ * @copyright 2025 GOWAAA
+ */
 
-import { bootstrapCameraKit, createMediaStreamSource, Transform2D } from "@snap/camera-kit";
-// CSS is linked in HTML, so no import needed here: // import "./styles/index.v3.css";
-import { CameraManager } from "./camera";
-import { MediaRecorderManager } from "./recorder";
-import { UIManager } from "./ui";
-import { VideoProcessor } from "./videoProcessor";
-import { Settings } from "./settings";
+import { bootstrapCameraKit, createMediaStreamSource, Transform2D } from "@snap/camera-kit"
+import "./styles/index.v3.css"
+import { CameraManager } from "./camera"
+import { MediaRecorderManager } from "./recorder"
+import { UIManager } from "./ui"
+import { VideoProcessor } from "./videoProcessor"
+import { Settings } from "./settings"
 
-// Motion Permission Request Function
+// DOM Elements for start screen
+const startScreen = document.getElementById('start-screen');
+const startButton = document.getElementById('start-button');
+const permissionStatusElem = document.getElementById('permission-status');
+const mainAppContainer = document.getElementById('main-app-container');
+const loadingElement = document.getElementById("loading"); // Used by UIManager and for global errors
+
+// Hide loading initially, start screen will be shown
+if (loadingElement) loadingElement.style.display = 'none';
+
 async function requestMotionPermissions() {
-  let motionGranted = false;
-  let orientationGranted = false;
+  permissionStatusElem.style.display = 'none'; // Clear previous status
 
-  // Helper to request a specific permission
-  async function requestPermission(eventType, eventName) {
-    let granted = false;
-    if (typeof eventType !== 'undefined' && typeof eventType.requestPermission === 'function') {
-      try {
-        console.log(`Requesting ${eventName} permission...`);
-        const permissionState = await eventType.requestPermission();
-        if (permissionState === 'granted') {
-          console.log(`${eventName} permission granted.`);
-          granted = true;
-        } else {
-          console.warn(`${eventName} permission ${permissionState}.`);
+  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    // iOS 13+
+    try {
+      const permissionState = await DeviceMotionEvent.requestPermission();
+      if (permissionState === 'granted') {
+        if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
+          try { await DeviceOrientationEvent.requestPermission(); } 
+          catch (orientError) { console.warn('Could not get orientation permission, but motion was granted:', orientError); }
         }
-      } catch (error) {
-        console.error(`Error requesting ${eventName} permission:`, error);
-        // Avoid alerting for non-critical errors, log them instead.
+        return true;
+      } else {
+        permissionStatusElem.textContent = 'Motion sensor permission was denied. Please enable it in your browser settings if you wish to use features requiring motion data.';
+        permissionStatusElem.style.display = 'block';
+        return false;
       }
-    } else {
-      console.log(`${eventName}.requestPermission API not available (e.g., not iOS 12.2+/Safari, or already handled).`);
-      granted = true; // Assume accessible or not strictly required by this API if not present
+    } catch (error) {
+      console.error('Error requesting motion permission:', error);
+      permissionStatusElem.textContent = 'Could not request motion sensor permissions. An error occurred.';
+      permissionStatusElem.style.display = 'block';
+      return false;
     }
-    return granted;
+  } else {
+    console.log('DeviceMotionEvent.requestPermission not found. Assuming permissions are granted or not strictly required for this browser to proceed.');
+    return true; 
   }
-
-  motionGranted = await requestPermission(DeviceMotionEvent, 'DeviceMotionEvent');
-  orientationGranted = await requestPermission(DeviceOrientationEvent, 'DeviceOrientationEvent');
-
-  return { motionGranted, orientationGranted };
 }
 
-// Main application initialization logic
-async function initializeARApp(uiManager) {
-  const loadingElement = document.getElementById("loading"); // The spinner div
-
+async function initializeAppAndCameraKit() {
+  // UIManager will be instantiated below, it handles the #loading element.
+  // Show loading using UIManager once it's initialized.
   // Get environment variables
-  const apiToken = process.env.API_TOKEN;
-  const lensID = process.env.LENS_ID;
-  const groupID = process.env.GROUP_ID;
+  const apiToken = process.env.API_TOKEN
+  const lensID = process.env.LENS_ID
+  const groupID = process.env.GROUP_ID
 
   if (!apiToken || !lensID || !groupID) {
-    console.error("Missing required environment variables. Please check your environment settings.");
-    if (loadingElement) {
-        loadingElement.innerHTML = `<p style="color:red; text-align:center; padding:20px; font-weight:bold;">Configuration Error!<br>Please check console.</p>`;
-        loadingElement.style.display = 'flex'; // Ensure it's visible
-    }
-    return false; // Indicate failure
+    console.error("Missing required environment variables. Please check your environment settings.")
+    permissionStatusElem.textContent = "Configuration error. App cannot start. Please check console.";
+    permissionStatusElem.style.display = 'block';
+    startScreen.style.display = 'flex'; // Re-show start screen
+    mainAppContainer.style.display = 'none';
+    if (loadingElement) loadingElement.style.display = 'none'; // Hide loading if it was shown
+    startButton.disabled = false; 
+    startButton.textContent = 'Try Again';
+    return
   }
 
   // Initialize managers
-  const cameraManager = new CameraManager();
-  const videoProcessor = new VideoProcessor();
-  const mediaRecorder = new MediaRecorderManager(videoProcessor, uiManager, cameraManager);
+  const cameraManager = new CameraManager()
+  const uiManager = new UIManager() 
+  const videoProcessor = new VideoProcessor()
+  // Pass cameraManager to MediaRecorderManager constructor
+  const mediaRecorder = new MediaRecorderManager(videoProcessor, uiManager, cameraManager)
+
+
+  uiManager.showLoading(true); // Show loading indicator now that UIManager is ready
 
   try {
-    // Request Motion Sensor Permissions (now tied to user gesture from start button)
-    const motionPermissions = await requestMotionPermissions();
-    if (!motionPermissions.motionGranted || !motionPermissions.orientationGranted) {
-        console.warn("Motion/Orientation permissions were not fully granted. Some AR features might be limited.");
-        // Non-blocking, app can often proceed.
-    }
-
     // Initialize Camera Kit
-    const cameraKit = await bootstrapCameraKit({ apiToken });
+    const cameraKit = await bootstrapCameraKit({
+      apiToken: apiToken,
+    })
 
-    const liveRenderTarget = document.getElementById("canvas");
-    if (!liveRenderTarget) throw new Error("Canvas element not found!");
-    const session = await cameraKit.createSession({ liveRenderTarget });
+    // Get canvas element for live render target
+    const liveRenderTarget = document.getElementById("canvas")
 
-    // Initialize camera (this will also prompt for camera/mic)
-    const mediaStream = await cameraManager.initializeCamera();
-    const initialSource = createMediaStreamSource(mediaStream, {
+    // Create camera kit session
+    const session = await cameraKit.createSession({ liveRenderTarget })
+
+    // Initialize camera and set up source
+    const mediaStream = await cameraManager.initializeCamera()
+    const initialSource = createMediaStreamSource(mediaStream, { // Renamed to initialSource for clarity
       cameraType: cameraManager.isBackFacing ? "environment" : "user",
-      disableSourceAudio: false,
-    });
-    cameraManager.currentSource = initialSource;
-    await session.setSource(initialSource);
+      disableSourceAudio: false, // Ensure audio is not disabled for the source
+    })
+    cameraManager.currentSource = initialSource // Store initial source in CameraManager
+    await session.setSource(initialSource)
 
-    if (!cameraManager.isBackFacing && cameraManager.isMobile) { // Mirror front camera on mobile
-      initialSource.setTransform(Transform2D.MirrorX);
+    if (!cameraManager.isBackFacing) {
+      initialSource.setTransform(Transform2D.MirrorX)
     }
-    await session.setFPSLimit(Settings.camera.fps);
-    await session.play();
+    // SetRenderSize will be called by uiManager.updateRenderSize
+    await session.setFPSLimit(Settings.camera.fps)
+    await session.play()
 
-    const lens = await cameraKit.lensRepository.loadLens(lensID, groupID);
-    await session.applyLens(lens);
+    // Load and apply lens
+    const lens = await cameraKit.lensRepository.loadLens(lensID, groupID)
+    await session.applyLens(lens)
 
-    // Set up UI event listeners
+    // Set up event listeners
     uiManager.recordButton.addEventListener("click", async () => {
       if (uiManager.recordPressedCount % 2 === 0) {
-        const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager);
+        // Pass cameraManager instance to startRecording
+        const success = await mediaRecorder.startRecording(liveRenderTarget, cameraManager)
         if (success) {
-          uiManager.updateRecordButtonState(true);
+          uiManager.updateRecordButtonState(true)
         } else {
-            // If startRecording failed, reset button state
-            uiManager.recordPressedCount = 0; // Or ensure it's even
-            uiManager.updateRecordButtonState(false);
+          // If starting failed, reset UI relevant parts (e.g. recordPressedCount)
+          // uiManager.recordPressedCount may need to be handled carefully if start fails
         }
       } else {
-        uiManager.updateRecordButtonState(false);
-        uiManager.toggleRecordButton(false); // Hides record button after stopping
-        mediaRecorder.stopRecording();
+        uiManager.updateRecordButtonState(false)
+        uiManager.toggleRecordButton(false) // This hides the record button after stopping
+        mediaRecorder.stopRecording()
       }
-    });
+    })
 
     uiManager.switchButton.addEventListener("click", async () => {
       try {
-        uiManager.showLoading(true); // Show loader during camera switch
-        const newSource = await cameraManager.updateCamera(session);
-        uiManager.updateRenderSize(newSource, liveRenderTarget);
+        // cameraManager.updateCamera updates cameraManager.mediaStream and cameraManager.currentSource
+        const newSource = await cameraManager.updateCamera(session)
+        uiManager.updateRenderSize(newSource, liveRenderTarget)
+
+        // If recording, switch the audio track for the MediaRecorder
         if (mediaRecorder.isRecording()) {
-          mediaRecorder.switchCameraAudio(cameraManager.mediaStream);
+          mediaRecorder.switchCameraAudio(cameraManager.mediaStream) // Use the new mediaStream from cameraManager
         }
       } catch (error) {
-        console.error("Error switching camera:", error);
-        alert("Could not switch camera. Please try again."); // User feedback
-      } finally {
-        uiManager.showLoading(false);
+        console.error("Error switching camera:", error)
+        // Potentially inform the user
       }
-    });
+    })
 
-    window.addEventListener("resize", () => uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget));
-    uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget);
+    // The back-button's onclick is now primarily managed within UIManager.displayPostRecordButtons
+    // to ensure it has access to necessary instances for resetting state.
 
-    document.body.classList.add("app-started"); // For CSS targeting
+    // Add window resize listener
+    window.addEventListener("resize", () => uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget))
 
-    return true; // Indicate success
-
+    // Update initial render size
+    uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget)
+    // Hide loading icon once everything is ready
+    uiManager.showLoading(false);
   } catch (error) {
-    console.error("Error during application startup:", error);
-    if (loadingElement) {
-        loadingElement.innerHTML = `<p style="color:red; text-align:center; padding:20px; font-weight:bold;">Failed to Start AR Experience <br>(${error.message})<br>Please refresh and ensure camera/microphone permissions are granted.</p>`;
-        loadingElement.style.display = 'flex';
-    } else {
-        alert(`Failed to Start AR Experience: ${error.message}. Please refresh and ensure permissions are granted.`);
-    }
-    return false; // Indicate failure
-  } finally {
-    // Hide loading spinner only if initialization was successful or if it was not handled by error case
-    // The error cases above explicitly manage the loadingElement's content and visibility.
-    // If no error, it will be hidden at the end of this block by uiManager.showLoading(false) from the caller.
+    console.error("Error during app initialization:", error);
+    permissionStatusElem.textContent = `Error initializing application: ${error.message}. Please refresh and try again.`;
+    permissionStatusElem.style.display = 'block';
+    startScreen.style.display = 'flex'; 
+    mainAppContainer.style.display = 'none';
+    uiManager.showLoading(false); // Ensure loading is hidden on error
+    startButton.disabled = false;
+    startButton.textContent = 'Try Again';
   }
 }
 
-// Wait for the DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', () => {
-  const startScreen = document.getElementById('start-screen');
-  const startArButton = document.getElementById('start-ar-button');
-  const loadingElement = document.getElementById('loading'); // The main spinner
-  const uiManager = new UIManager(); // Instantiate UIManager once, it manages its own elements
+startButton.addEventListener('click', async () => {
+  startButton.disabled = true;
+  startButton.textContent = 'Requesting Permissions...';
+  permissionStatusElem.style.display = 'none'; 
 
-  if (startArButton && startScreen && loadingElement) {
-    startArButton.addEventListener('click', async () => {
-      startArButton.disabled = true; // Prevent double clicks
-      startArButton.textContent = "Loading...";
+  const permissionsGranted = await requestMotionPermissions();
 
-      // Hide start screen using CSS class for transition
-      startScreen.classList.add('hidden');
-
-      // Show the main loading spinner
-      uiManager.showLoading(true); // UIManager handles the #loading element
-
-      // A brief delay can make the transition feel smoother if CSS transition isn't enough
-      // or if heavy JS follows immediately. Usually, class-based transition is sufficient.
-      // setTimeout(async () => {
-        try {
-          const success = await initializeARApp(uiManager);
-          if (success) {
-            // App initialized successfully, hide loader
-            uiManager.showLoading(false);
-          } else {
-            // Initialization failed, error message should be visible in loadingElement
-            // No need to hide loadingElement as it displays the error
-            startArButton.disabled = false; // Re-enable button if start failed
-            startArButton.textContent = "Try Again";
-            startScreen.classList.remove('hidden'); // Show start screen again
-          }
-        } catch (e) {
-          // Catch any unexpected errors from initializeARApp itself
-          console.error("Critical error during app initialization sequence:", e);
-          if (loadingElement) {
-              loadingElement.innerHTML = `<p style="color:red; text-align:center;padding:20px;font-weight:bold;">Critical Application Error.<br>Could not start. Check console for details.</p>`;
-              loadingElement.style.display = 'flex';
-          }
-          startArButton.disabled = false;
-          startArButton.textContent = "Error - Try Again";
-          startScreen.classList.remove('hidden');
-        }
-      // }, 100); // Small delay example, often not needed
-
-    });
+  if (permissionsGranted) {
+    startButton.textContent = 'Loading Experience...';
+    // Hiding start screen and showing app container is done before calling initializeAppAndCameraKit
+    startScreen.style.display = 'none';
+    mainAppContainer.style.display = 'block'; 
+    await initializeAppAndCameraKit(); 
   } else {
-    console.error("Essential UI elements (start screen, start button, or loading indicator) not found! App cannot initialize.");
-    document.body.innerHTML = `<p style="color:red; text-align:center; padding: 50px; font-size: 1.2em; font-weight:bold;">Critical Error: UI Components Missing.<br>The application cannot start. Please contact support.</p>`;
+    // Permission message already set by requestMotionPermissions
+    startButton.disabled = false;
+    startButton.textContent = 'Grant Permissions & Start';
+    mainAppContainer.style.display = 'none'; 
   }
 });
