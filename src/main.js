@@ -27,30 +27,49 @@ if (loadingElement) loadingElement.style.display = 'none';
 async function requestMotionPermissions() {
   permissionStatusElem.style.display = 'none'; // Clear previous status
 
-  if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
-    // iOS 13+
+  const isIOSDevice = /iPhone|iPad|iPod/i.test(navigator.userAgent); // General iOS check
+  const isIPhone = /iPhone/i.test(navigator.userAgent); // Specific iPhone check
+
+  // Only request on iPhone and if the permission API exists (iOS 13+)
+  if (isIPhone && typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+    console.log("iPhone detected, attempting to request motion permissions.");
     try {
       const permissionState = await DeviceMotionEvent.requestPermission();
       if (permissionState === 'granted') {
+        // Attempt to get orientation permission as well if motion is granted
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-          try { await DeviceOrientationEvent.requestPermission(); } 
-          catch (orientError) { console.warn('Could not get orientation permission, but motion was granted:', orientError); }
+          try { 
+            await DeviceOrientationEvent.requestPermission(); 
+            console.log("Orientation permission granted on iPhone.");
+          } 
+          catch (orientError) { 
+            console.warn('Could not get orientation permission on iPhone, but motion was granted:', orientError); 
+          }
         }
+        console.log("Motion permission granted on iPhone.");
         return true;
       } else {
-        permissionStatusElem.textContent = 'Motion sensor permission was denied. Please enable it in your browser settings if you wish to use features requiring motion data.';
+        permissionStatusElem.textContent = 'Motion sensor permission was denied on your iPhone. Please enable it in Safari settings (Settings > Safari > Motion & Orientation Access) if you wish to use features requiring motion data.';
         permissionStatusElem.style.display = 'block';
+        console.log("Motion permission denied on iPhone.");
         return false;
       }
     } catch (error) {
-      console.error('Error requesting motion permission:', error);
-      permissionStatusElem.textContent = 'Could not request motion sensor permissions. An error occurred.';
+      console.error('Error requesting motion permission on iPhone:', error);
+      permissionStatusElem.textContent = 'Could not request motion sensor permissions on your iPhone. An error occurred.';
       permissionStatusElem.style.display = 'block';
       return false;
     }
   } else {
-    console.log('DeviceMotionEvent.requestPermission not found. Assuming permissions are granted or not strictly required for this browser to proceed.');
-    return true; 
+    if (isIOSDevice && !isIPhone) {
+        console.log('iOS device (not iPhone) detected. Motion permissions typically not explicitly requested or handled by OS/browser.');
+    } else if (!isIOSDevice) {
+        console.log('Non-iOS device detected. Assuming motion permissions are granted or not strictly required to be explicitly requested.');
+    } else {
+        // This case would be an iPhone but without the requestPermission API (older iOS)
+        console.log('iPhone detected, but DeviceMotionEvent.requestPermission not found. Assuming permissions are handled by OS/browser (older iOS).');
+    }
+    return true; // For non-iPhones or iPhones without the specific API, assume granted or not needed
   }
 }
 
@@ -188,7 +207,7 @@ startButton.addEventListener('click', async () => {
   } else {
     // Permission message already set by requestMotionPermissions
     startButton.disabled = false;
-    startButton.textContent = 'Grant Permissions & Start';
+    startButton.textContent = 'Grant Permissions & Start'; // Or 'Try Again' if more appropriate
     mainAppContainer.style.display = 'none'; 
   }
 });
