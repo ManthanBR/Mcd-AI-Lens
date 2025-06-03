@@ -198,7 +198,7 @@ body {
   position: absolute;
   bottom: 0;
   right: 0;
-  max-width: 80%; /* Example: takes up to 40% of the parent's width */
+  max-width: 100%; /* Example: takes up to 40% of the parent's width */
   max-height: 35%;/* Example: takes up to 35% of the parent's height */
   width: auto;
   height: auto;
