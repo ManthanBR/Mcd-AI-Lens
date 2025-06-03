@@ -3,133 +3,137 @@ html {
   padding: 0;
   width: 100%;
   height: 100%;
-  overflow: hidden; /* Prevent scrollbars on the html element */
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  overflow: hidden;
+  font-family: 'Arial Black', Gadget, sans-serif; /* Bolder default font */
 }
 
 body {
   margin: 0;
   padding: 0;
-  width: 100%; /* Make body fill html width */
-  height: 100%; /* Make body fill html height */
-  overflow: hidden; /* This was already correctly set */
-  background-color: rgb(26, 26, 26);
-  color: #f0f0f0; /* Lighter default text color for better readability on dark bg */
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: #DB0007; /* McDonald's Red */
+  color: #FFC72C; /* McDonald's Yellow */
 }
 
 #canvas {
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw; /* Viewport width */
+  width: 100vw;
   z-index: 1;
-  /* For debugging, you can add a border to see the canvas bounds: */
-  /* border: 3px solid red; */
 }
 
-/* Start Screen Styles */
+/* Start Screen Styles - McDonald's Theme */
 #start-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: #1a1a1a; /* Slightly different dark shade */
-  color: #e0e0e0;
+  background-color: #DB0007; /* McDonald's Red */
+  color: #FFC72C; /* McDonald's Yellow */
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   text-align: center;
-  z-index: 2000; /* Above everything else */
-  padding: 20px 15px; /* Adjusted padding for sides */
+  z-index: 2000;
+  padding: 20px 15px;
   box-sizing: border-box;
-  overflow-y: auto; /* Allow scrolling if content overflows on very small screens */
+  overflow-y: auto;
 }
 
 #logo-placeholder {
-  max-width: 220px; /* Increased from 180px */
-  max-height: 220px; /* Increased from 180px */
-  margin-bottom: 30px; /* Adjusted from 35px, might need tweaking based on overall balance */
-  /* For a circular placeholder if logo is square/round */
-  /* border-radius: 50%;
-     background-color: #333;
-     border: 2px solid #444;
-     object-fit: cover; */ /* If you want the image to cover the area */
+  max-width: 200px; /* Adjust as needed, keeping it fairly large */
+  max-height: 200px;
+  margin-bottom: 25px;
+  /* If your logo is an SVG, you can try to color it with CSS:
+     filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+  */
 }
 
-
 #start-screen h1 {
-  font-size: 4em; /* Increased from 3.2em - significantly larger */
-  margin-bottom: 25px; /* Increased from 20px */
-  font-weight: 600;
-  color: #ffffff;
-  line-height: 1.1; /* Added line-height for taller text */
+  font-size: 3.5em; /* Large and impactful */
+  margin-bottom: 20px;
+  font-weight: 900; /* Very bold */
+  color: #FFC72C;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.15), /* Subtle darker outline/shadow */
+               1px 1px 0px #DAA520; /* Inner darker yellow highlight for pop */
 }
 
 #start-screen p {
-  font-size: 1.4em; /* Increased from 1.25em */
-  margin-bottom: 45px; /* Increased from 40px */
-  max-width: 90%; /* Allow slightly more width */
-  line-height: 1.6; /* Adjusted from 1.7 */
-  color: #b0b0b0; /* Softer color for paragraph */
+  font-size: 1.6em; /* Larger paragraph text */
+  margin-bottom: 35px;
+  max-width: 90%;
+  line-height: 1.4;
+  color: #FFC72C;
+  font-weight: 700; /* Bold paragraph */
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15);
 }
 
 #start-screen button {
-  padding: 20px 45px; /* Increased padding from 16px 40px */
-  font-size: 1.45em; /* Increased font size from 1.2em */
-  font-weight: 500;
+  padding: 18px 30px; /* More horizontal, less vertical for elongation */
+  font-size: 1.7em;   /* Large button text */
+  font-weight: 900;   /* Very bold button text */
+  color: #FFC72C;
+  background-color: #DB0007; /* Same red as background */
+  border: 4px solid #FFC72C; /* Prominent yellow border */
+  border-radius: 15px;      /* Slightly rounded corners, less pill-like for a bolder feel */
   cursor: pointer;
-  background: linear-gradient(145deg, #007bff, #0056b3); /* Gradient background */
-  color: white;
-  border: none;
-  border-radius: 35px; /* Increased from 28px */
-  transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
-  box-shadow: 0 5px 12px rgba(0, 123, 255, 0.3); /* Slightly adjusted shadow */
-  outline: none; /* Remove default browser outline */
-  min-width: 70%; /* Ensure button takes up good width */
-  max-width: 300px; /* Prevent button from becoming excessively wide on larger "phone" screens */
+  transition: background-color 0.2s ease, transform 0.15s ease, border-color 0.2s ease;
+  text-transform: uppercase;
+  min-width: 80%; /* Ensure button is wide */
+  max-width: 350px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Button shadow */
+  text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.15);
 }
 
 #start-screen button:hover {
-  background: linear-gradient(145deg, #0069d9, #004085); /* Darker gradient on hover */
-  box-shadow: 0 7px 15px rgba(0, 123, 255, 0.4);
-  transform: translateY(-3px); /* More pronounced lift */
+  background-color: #c50007; /* Slightly darker red on hover */
+  border-color: #fff352; /* Brighter yellow border on hover */
+  transform: translateY(-2px);
 }
 
 #start-screen button:active {
-  transform: translateY(0px); /* Press down effect */
-  box-shadow: 0 3px 7px rgba(0, 123, 255, 0.3);
+  transform: translateY(1px);
+  background-color: #b00006;
 }
 
 #start-screen button:disabled {
-  background: #555; /* Darker grey for disabled */
-  color: #999;
+  background-color: #a30005;
+  color: #d4a200;
+  border-color: #d4a200;
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
+  text-shadow: none;
 }
 
 #permission-status {
-  margin-top: 30px; /* Increased from 25px */
-  font-size: 1.1em; /* Increased from 1em */
-  color: #ff4d4d; /* Brighter red for errors */
-  font-weight: 500;
+  margin-top: 25px;
+  font-size: 1.2em; /* Larger error text */
+  color: #FFC72C; /* Yellow for errors, with shadow for emphasis */
+  font-weight: 700;
   max-width: 90%;
   line-height: 1.4;
+  text-shadow: 2px 2px 2px rgba(100, 0, 0, 0.7); /* Stronger shadow for error text */
 }
 
 
-/* ... rest of your CSS ... */
+/* --- REST OF YOUR EXISTING CSS (Unchanged from previous version) --- */
 
 .poweredbysnap-logo {
-  width: auto; /* Set to auto to avoid stretching */
-  position: absolute; /* Position relative to the viewport */
-  bottom: -40px; /* Adjust to desired distance from the bottom */
-  left: 40px; /* Adjust to desired distance from the left */
+  width: auto;
+  position: absolute;
+  bottom: -40px;
+  left: 40px;
   display: flex;
   align-items: center;
-  justify-content: flex-start; /* Align content within the element to the left */
+  justify-content: flex-start;
   z-index: 900;
 }
 
@@ -148,32 +152,23 @@ body {
 
 #outline {
   position: absolute;
-  /* bottom: 10%; /* These are defined with #record-button, let's keep them there */
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
-  height: var(--button-size, 200px); /* Default for mobile */
+  height: var(--button-size, 200px);
   width: var(--button-size, 200px);
   border: none;
   z-index: 900;
   transition: background-color 0.2s ease;
 }
 
-/* Combined #outline and #record-button common positioning */
 #controls #outline,
 #controls #record-button {
-  position: absolute; /* relative to #controls if needed, or keep as is if #controls is just a conceptual container */
-  bottom: 0; /* Position relative to #controls bottom */
+  position: absolute;
+  bottom: 0;
   left: 50%;
   transform: translateX(-50%);
 }
 
-
 #record-button {
-  /* position: absolute; */ /* Handled above */
-  /* bottom: 10%; */
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
-  height: var(--button-size, 200px); /* Default for mobile */
+  height: var(--button-size, 200px);
   width: var(--button-size, 200px);
   background-image: url("../assets/RecordButton.png");
   background-size: cover;
@@ -187,33 +182,33 @@ body {
 }
 
 #record-button.pressed {
-  background-color: green; /* Change to green when pressed */
-  content: "Recording..."; /* Optionally add text */
+  background-color: green;
+  content: "Recording...";
 }
 
 #action-buttons {
   position: absolute;
-  bottom: 20%; /* Adjust the distance from the bottom of the screen */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%); /* Offset by half the width and height */
-  display: flex; /* Enables flex layout */
-  justify-content: center; /* Aligns buttons horizontally */
-  align-items: center; /* Aligns buttons vertically */
-  z-index: 1000; /* Ensure visibility above other elements */
-  flex-wrap: wrap; /* Allows wrapping if container width is too small */
+  bottom: 20%;
+  left: 50%;
+  transform: translate(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  flex-wrap: wrap;
 }
 
 #back-button-container {
   position: absolute;
-  top: 2%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-top) */
-  left: 3%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-left) */
+  top: 2%;
+  left: 3%;
   z-index: 1000;
 }
 
 #back-button {
   transform: none;
   background-color: transparent;
-  height: 100px; /* Consider slightly smaller for easier tapping without overlap */
+  height: 100px;
   width: 100px;
   color: transparent;
   border: none;
@@ -226,11 +221,10 @@ body {
   -webkit-touch-callout: none;
 }
 #back-button img {
-  /* Add this if your button uses an image */
   max-width: 100%;
   max-height: 100%;
   height: auto;
-  display: block; /* Prevents extra space below image */
+  display: block;
 }
 
 #back-button:active {
@@ -293,52 +287,47 @@ body {
 
 #switch-cam {
   position: absolute;
-  top: 3%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-top) */
-  right: 5%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-right) */
+  top: 3%;
+  right: 5%;
   z-index: 950;
 }
 
 #switch-button {
   height: 70px;
   width: 70px;
-  background-image: url("../assets/SwitchButton.png"); /* Green background */
-  background-size: contain; /* Ensure the image covers the button */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Preent tiling */
+  background-image: url("../assets/SwitchButton.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   background-color: transparent;
   border: none;
-  user-select: none; /* Disable text selection */
+  user-select: none;
   outline: none;
-  transition: transform 0.2s ease; /* Smooth hover animation */
+  transition: transform 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
 }
 
 #switch-button:active {
-  transform: translate(5%, 5%); /* Only scale without affecting translation */
+  transform: translate(5%, 5%);
 }
 
 #loading {
-  position: fixed; /* Use fixed to ensure it's viewport relative and stays centered */
+  position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center it properly */
-  z-index: 1001; /* Above everything else */
-  display: none; /* Hidden by default */
-  /* Added for better visibility if it has no background */
-  /* background-color: rgba(0,0,0,0.1);
-     padding: 20px;
-     border-radius: 10px; */
+  transform: translate(-50%, -50%);
+  z-index: 1001;
+  display: none;
 }
 
 #loading-icon {
-  height: 100px; /* Made it a bit smaller */
+  height: 100px;
   width: 100px;
-  animation: spin 2s linear infinite; /* Apply the spin animation */
-  display: block; /* if it's an img */
+  animation: spin 2s linear infinite;
+  display: block;
 }
 
-/* Keyframes for the rotation */
 @keyframes spin {
   from {
     transform: rotate(0deg);
@@ -370,7 +359,6 @@ body {
   width: 50px;
 }
 
-/* Hide switch button on desktop */
 .desktop #switch-cam {
   display: none;
 }
