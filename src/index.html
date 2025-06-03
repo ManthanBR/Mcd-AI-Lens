@@ -5,10 +5,19 @@
     <title>Mcd RS Meal</title>
     <meta name="description" content="Made by Filter You" />
     <meta name="robots" content="noindex" />
+    <!-- Make sure your CSS is linked -->
+    <link rel="stylesheet" href="./styles/index.v3.css" />
     <script type="module" src="/src/main.js"></script>
   </head>
 
   <body>
+    <!-- START SCREEN -->
+    <div id="start-screen">
+      <img src="../assets/logo.png" alt="Logo" id="start-logo" />
+      <button id="start-ar-button">Start AR Experience</button>
+    </div>
+    <!-- END START SCREEN -->
+
     <canvas id="canvas"></canvas>
     <div id="switch-cam">
       <button id="switch-button" class="button-class"></button>
@@ -36,7 +45,7 @@
       </button>
     </div>
 
-    <div id="loading">
+    <div id="loading"> <!-- This is the spinning loader -->
       <img id="loading-icon" src="../assets/LoadingIcon.png" alt="loading" />
     </div>
 

@@ -1,9 +1,11 @@
+/* index.v3.css */
 html {
   margin: 0;
   padding: 0;
   width: 100%;
   height: 100%;
   overflow: hidden; /* Prevent scrollbars on the html element */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 body {
@@ -11,9 +13,73 @@ body {
   padding: 0;
   width: 100%; /* Make body fill html width */
   height: 100%; /* Make body fill html height */
-  overflow: hidden; /* This was already correctly set */
+  overflow: hidden;
   background-color: rgb(26, 26, 26);
+  color: #fff; /* Default text color for better contrast on dark bg */
 }
+
+/* START SCREEN STYLES */
+#start-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #121212; /* Dark background */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000; /* Ensure it's on top */
+  text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+  transition: opacity 0.5s ease-out, visibility 0.5s ease-out; /* For smooth hiding */
+  opacity: 1;
+  visibility: visible;
+}
+
+#start-screen.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none; /* Important for not blocking underlying elements */
+}
+
+
+#start-logo {
+  max-width: 200px; /* Adjust as needed */
+  max-height: 150px; /* Adjust as needed */
+  margin-bottom: 50px; /* Space between logo and button */
+}
+
+#start-ar-button {
+  padding: 18px 35px;
+  font-size: clamp(1em, 4vw, 1.3em); /* Responsive font size */
+  font-weight: 600;
+  color: #000000; /* Text color - black for yellow button */
+  background-color: #FFFC00; /* Snap yellow */
+  border: none;
+  border-radius: 30px; /* More rounded */
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  -webkit-tap-highlight-color: transparent; /* Remove tap highlight on mobile */
+}
+
+#start-ar-button:hover {
+  background-color: #fff000; /* Slightly different yellow on hover */
+  box-shadow: 0 8px 20px rgba(255, 252, 0, 0.3);
+}
+
+#start-ar-button:active {
+  background-color: #e6e300; /* Darker when pressed */
+  transform: translateY(2px);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+/* END START SCREEN STYLES */
+
 
 #canvas {
   position: absolute;
@@ -24,8 +90,6 @@ body {
   /* For debugging, you can add a border to see the canvas bounds: */
   /* border: 3px solid red; */
 }
-
-/* ... rest of your CSS ... */
 
 .poweredbysnap-logo {
   width: auto; /* Set to auto to avoid stretching */
@@ -53,9 +117,6 @@ body {
 
 #outline {
   position: absolute;
-  /* bottom: 10%; /* These are defined with #record-button, let's keep them there */
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
   height: var(--button-size, 200px); /* Default for mobile */
   width: var(--button-size, 200px);
   border: none;
@@ -74,10 +135,6 @@ body {
 
 
 #record-button {
-  /* position: absolute; */ /* Handled above */
-  /* bottom: 10%; */
-  /* left: 50%; */
-  /* transform: translateX(-50%); */
   height: var(--button-size, 200px); /* Default for mobile */
   width: var(--button-size, 200px);
   background-image: url("../assets/RecordButton.png");
@@ -89,36 +146,37 @@ body {
   border: none;
   z-index: 1000;
   transition: background-color 0.2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 #record-button.pressed {
-  background-color: green; /* Change to green when pressed */
-  content: "Recording..."; /* Optionally add text */
+  background-color: green; /* Example, you're using background-image */
 }
 
 #action-buttons {
   position: absolute;
-  bottom: 20%; /* Adjust the distance from the bottom of the screen */
-  left: 50%; /* Center horizontally */
-  transform: translate(-50%); /* Offset by half the width and height */
-  display: flex; /* Enables flex layout */
-  justify-content: center; /* Aligns buttons horizontally */
-  align-items: center; /* Aligns buttons vertically */
-  z-index: 1000; /* Ensure visibility above other elements */
-  flex-wrap: wrap; /* Allows wrapping if container width is too small */
+  bottom: 20%;
+  left: 50%;
+  transform: translate(-50%);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  flex-wrap: wrap;
 }
 
 #back-button-container {
   position: absolute;
-  top: 2%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-top) */
-  left: 3%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-left) */
+  top: 2%;
+  left: 3%;
   z-index: 1000;
 }
 
 #back-button {
   transform: none;
   background-color: transparent;
-  height: 100px; /* Consider slightly smaller for easier tapping without overlap */
+  height: 100px;
   width: 100px;
   color: transparent;
   border: none;
@@ -131,11 +189,10 @@ body {
   -webkit-touch-callout: none;
 }
 #back-button img {
-  /* Add this if your button uses an image */
   max-width: 100%;
   max-height: 100%;
   height: auto;
-  display: block; /* Prevents extra space below image */
+  display: block;
 }
 
 #back-button:active {
@@ -198,49 +255,49 @@ body {
 
 #switch-cam {
   position: absolute;
-  top: 3%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-top) */
-  right: 5%; /* Adjusted for typical mobile safe areas, consider using env(safe-area-inset-right) */
+  top: 3%;
+  right: 5%;
   z-index: 950;
 }
 
 #switch-button {
   height: 70px;
   width: 70px;
-  background-image: url("../assets/SwitchButton.png"); /* Green background */
-  background-size: contain; /* Ensure the image covers the button */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Preent tiling */
+  background-image: url("../assets/SwitchButton.png");
+  background-size: contain;
+  background-position: center;
+  background-repeat: no-repeat;
   background-color: transparent;
   border: none;
-  user-select: none; /* Disable text selection */
+  user-select: none;
   outline: none;
-  transition: transform 0.2s ease; /* Smooth hover animation */
+  transition: transform 0.2s ease;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
+  cursor: pointer;
 }
 
 #switch-button:active {
-  transform: translate(5%, 5%); /* Only scale without affecting translation */
+  transform: translate(5%, 5%);
 }
 
 #loading {
-  position: fixed; /* Use fixed to ensure it's viewport relative and stays centered */
+  position: fixed;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%); /* Center it properly */
-  z-index: 1001; /* Above everything else */
-  display: none; /* Hidden by default */
-  /* Added for better visibility if it has no background */
-  /* background-color: rgba(0,0,0,0.1); 
-     padding: 20px; 
-     border-radius: 10px; */
+  transform: translate(-50%, -50%);
+  z-index: 10001; /* Above start screen when active, but below start screen if not hidden */
+  display: none; /* Hidden by default, shown by JS */
+  flex-direction: column; /* To allow text below icon if needed */
+  align-items: center;
+  justify-content: center;
 }
 
 #loading-icon {
-  height: 100px; /* Made it a bit smaller */
+  height: 100px;
   width: 100px;
-  animation: spin 2s linear infinite; /* Apply the spin animation */
-  display: block; /* if it's an img */
+  animation: spin 2s linear infinite;
+  display: block;
 }
 
 /* Keyframes for the rotation */
@@ -254,28 +311,29 @@ body {
 }
 
 /* Desktop-specific styles */
-.desktop #outline,
-.desktop #record-button {
+body.desktop #outline,
+body.desktop #record-button {
   height: 70px;
   width: 70px;
 }
 
-.desktop #share-button {
+body.desktop #share-button {
   height: 70px;
   width: 70px;
 }
 
-.desktop #download-button {
+body.desktop #download-button {
   height: 70px;
   width: 70px;
 }
 
-.desktop #back-button {
+body.desktop #back-button {
   height: 50px;
   width: 50px;
 }
 
 /* Hide switch button on desktop */
-.desktop #switch-cam {
+body.desktop #switch-cam {
   display: none;
 }
+
