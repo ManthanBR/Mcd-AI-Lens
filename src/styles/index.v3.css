@@ -13,7 +13,7 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #18191d;
+  background-color: #1d1c1f;
 }
 
 #canvas {
@@ -53,7 +53,7 @@ body {
   box-sizing: border-box;
   border: 12px solid #DB0007;
   border-radius: 35px;
-  overflow-y: auto;
+  overflow: hidden; /* Important to prevent scrollbars if bgg is large */
   box-shadow: 0px 0px 30px 8px rgba(0, 0, 0, 0.4);
   position: relative;
 }
@@ -64,6 +64,8 @@ body {
   justify-content: center;
   align-items: center;
   width: 100%;
+  z-index: 2; /* Ensure interactive content is above bgg-image if needed */
+  position: relative; /* Ensure z-index works */
 }
 
 #logo-placeholder {
@@ -143,13 +145,15 @@ body {
   width: 100%;
   min-height: 100px;
   margin: 30px 0;
+  z-index: 2; /* Ensure loader is above bgg-image */
+  position: relative;
 }
 
 .custom-loader-start-screen .dot {
   width: 20px;
   height: 20px;
   margin: 0 8px;
-  background-color: #DB0007; /* McDonald's Red for the dots */
+  background-color: #DB0007;
   border-radius: 50%;
   animation: bounceDot 1.4s infinite ease-in-out both;
 }
@@ -185,7 +189,23 @@ body {
     1px 1px 0px #FFF352,
     -1px -1px 0px #b00006,
     1px 1px 2px rgba(0,0,0,0.15);
+  position: relative; /* Ensure it's above bgg-image */
+  z-index: 1;       /* Ensure it's above bgg-image */
 }
+
+/* Styles for the bgg.png image */
+#bgg-image {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  max-width: 40%; /* Example: takes up to 40% of the parent's width */
+  max-height: 35%;/* Example: takes up to 35% of the parent's height */
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  z-index: 0; /* Lower z-index to be behind interactive content and permission status */
+}
+
 
 /* --- GLOBAL Custom Aesthetic Loader (Post-Recording) --- */
 #loading-global.custom-loader-global {
@@ -194,23 +214,22 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.65); /* Semi-transparent black overlay */
-  display: flex; /* Will be set to 'flex' by JS to show */
+  background-color: rgba(0, 0, 0, 0.65);
+  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 3000; /* Highest z-index */
+  z-index: 3000;
 }
 
-.custom-loader-global .dot { /* Dots for the GLOBAL loader */
-  width: 22px; /* Slightly larger dots for global loader */
+.custom-loader-global .dot {
+  width: 22px;
   height: 22px;
   margin: 0 10px;
-  background-color: #FFC72C; /* McDonald's Yellow for the dots */
+  background-color: #FFC72C;
   border-radius: 50%;
-  animation: bounceDot 1.4s infinite ease-in-out both; /* Re-use bounceDot animation */
+  animation: bounceDot 1.4s infinite ease-in-out both;
 }
 
-/* Animation delay for each dot - same as start screen loader */
 .custom-loader-global .dot:nth-child(1) {
   animation-delay: -0.32s;
 }
