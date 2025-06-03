@@ -16,7 +16,7 @@
           <h1>GET READY FOR YOUR<br/>RANVEER SINGH MEAL!</h1>
           <button id="start-button">LET'S GO!</button>
         </div>
-        <div id="loading" style="display: none;">
+        <div id="loading" style="display: none;"> {/* This is the START SCREEN's loader */}
           <img id="loading-icon" src="../assets/LoadingIcon.png" alt="loading" />
         </div>
         <p id="permission-status" style="display:none;"></p>
@@ -50,6 +50,11 @@
           <img id="backImg" src="../assets/BackButton.png" alt="back" />
         </button>
       </div>
+    </div>
+
+    {/* GLOBAL LOADING ICON - for post-recording processing etc. */}
+    <div id="loading-global" style="display: none;"> {/* Renamed to avoid ID clash */}
+      <img id="loading-icon-global" src="../assets/LoadingIcon.png" alt="loading" />
     </div>
 
     <script>
