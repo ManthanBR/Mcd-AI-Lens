@@ -1,17 +1,61 @@
 import { Settings } from "./settings"
 
 export class MediaRecorderManager {
-  constructor(videoProcessor, uiManager, cameraManager) { // Added cameraManager
+  constructor(videoProcessor, uiManager, cameraManager) {
     this.mediaRecorder = null
     this.recordedChunks = []
     this.videoProcessor = videoProcessor
     this.uiManager = uiManager
-    this.cameraManager = cameraManager; // Store cameraManager instance
+    this.cameraManager = cameraManager;
     this.canvasStream = null
-    // this.audioVideoStream = null; // This is no longer needed as we use cameraManager's stream
+
+    // AudioContext setup for robust audio track switching
+    this.audioContext = null;
+    this.audioDestinationNode = null;
+    this.currentAudioSourceNode = null;
+    this.recorderAudioTrack = null; // The stable track from audioDestinationNode
+
+    // Initialize AudioContext if supported
+    try {
+        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        this.audioDestinationNode = this.audioContext.createMediaStreamDestination();
+        // Get the stable audio track that will be fed to MediaRecorder
+        if (this.audioDestinationNode.stream.getAudioTracks().length > 0) {
+            this.recorderAudioTrack = this.audioDestinationNode.stream.getAudioTracks()[0];
+        } else {
+            // Fallback or error if destination stream has no audio track initially (should not happen)
+            console.warn("AudioDestinationNode stream has no audio tracks initially. Audio recording might fail.");
+        }
+    } catch (e) {
+        console.error("AudioContext is not supported in this browser. Audio track switching during recording may not be seamless.", e);
+        // App can continue, but switchCameraAudio might not work as expected or might rely on simpler track replacement
+    }
   }
 
-  async startRecording(liveRenderTarget, cameraManagerInstance) { // Takes cameraManager instance
+  _connectAudioSource(mediaStream) {
+    if (!this.audioContext || !this.audioDestinationNode || !mediaStream) return;
+
+    const audioTracks = mediaStream.getAudioTracks();
+    if (audioTracks.length > 0) {
+      const newAudioTrack = audioTracks[0];
+      if (this.currentAudioSourceNode) {
+        this.currentAudioSourceNode.disconnect();
+      }
+      // Create a new MediaStream with only the desired audio track to avoid issues if the stream has video
+      const audioStreamForSourceNode = new MediaStream([newAudioTrack]);
+      this.currentAudioSourceNode = this.audioContext.createMediaStreamSource(audioStreamForSourceNode);
+      this.currentAudioSourceNode.connect(this.audioDestinationNode);
+      console.log("Audio source connected to AudioContext destination.");
+    } else {
+      console.warn("New mediaStream has no audio tracks to connect.");
+      if (this.currentAudioSourceNode) {
+        this.currentAudioSourceNode.disconnect(); // Disconnect old one if new one is missing
+        this.currentAudioSourceNode = null;
+      }
+    }
+  }
+
+  async startRecording(liveRenderTarget, cameraManagerInstance) {
     try {
       if (!cameraManagerInstance || !cameraManagerInstance.mediaStream) {
         console.error("CameraManager instance or its mediaStream is not available for recording.")
@@ -20,17 +64,42 @@ export class MediaRecorderManager {
         return false
       }
 
-      const audioTracks = cameraManagerInstance.mediaStream.getAudioTracks()
-      if (audioTracks.length === 0) {
-        console.error("No audio track found in CameraManager's current mediaStream.")
-        this.uiManager.showLoading(false)
-        alert("Microphone not accessible. Cannot start recording with audio.")
-        return false // Or proceed with video-only recording if desired
+      // Ensure AudioContext is resumed (for browsers that start it in suspended state)
+      if (this.audioContext && this.audioContext.state === 'suspended') {
+        await this.audioContext.resume();
       }
-      const audioTrack = audioTracks[0]
+
+      this._connectAudioSource(cameraManagerInstance.mediaStream);
+
+      if (!this.recorderAudioTrack && this.audioDestinationNode) { // Attempt to get it again if it wasn't ready at construction
+         if (this.audioDestinationNode.stream.getAudioTracks().length > 0) {
+            this.recorderAudioTrack = this.audioDestinationNode.stream.getAudioTracks()[0];
+         }
+      }
+
+      if (!this.recorderAudioTrack && (!this.audioContext || !this.audioDestinationNode)) {
+          // Fallback to direct track cloning if AudioContext setup failed or no track
+          console.warn("AudioContext not available or recorderAudioTrack missing, falling back to direct audio track cloning.");
+          const audioTracks = cameraManagerInstance.mediaStream.getAudioTracks();
+          if (audioTracks.length === 0) {
+            console.error("No audio track found for recording (fallback).")
+            this.uiManager.showLoading(false)
+            alert("Microphone not accessible. Cannot start recording with audio.")
+            return false;
+          }
+          this.recorderAudioTrack = audioTracks[0].clone(); // Fallback track
+      } else if (!this.recorderAudioTrack) {
+          console.error("Failed to obtain a stable audio track for MediaRecorder via AudioContext.");
+          this.uiManager.showLoading(false);
+          alert("Audio recording setup failed. Cannot start recording.");
+          return false;
+      }
+
 
       this.canvasStream = liveRenderTarget.captureStream(Settings.recording.fps)
-      this.canvasStream.addTrack(audioTrack.clone()) // Clone the track
+      // Add the stable audio track from AudioContext or the fallback cloned track
+      this.canvasStream.addTrack(this.recorderAudioTrack);
+
 
       this.mediaRecorder = new MediaRecorder(this.canvasStream, {
         mimeType: Settings.recording.mimeType,
@@ -50,28 +119,25 @@ export class MediaRecorderManager {
         const blob = new Blob(this.recordedChunks, { type: Settings.recording.mimeType })
         
         let finalBlob = blob;
-        if (this.recordedChunks.length > 0) { // only process if there's data
+        if (this.recordedChunks.length > 0) { 
             try {
                 const fixedBlob = await this.videoProcessor.fixVideoDuration(blob)
                 finalBlob = fixedBlob;
             } catch (ffmpegError) {
                 console.error("FFmpeg processing failed:", ffmpegError);
-                // Fallback to using the original blob if ffmpeg fails
             }
         } else {
             console.warn("No data recorded.");
             this.uiManager.showLoading(false);
-            this.uiManager.toggleRecordButton(true); // Show record button again
-            // Potentially inform user that recording was empty
+            this.uiManager.toggleRecordButton(true); 
             this.resetRecordingVariables();
             return;
         }
         
         const url = URL.createObjectURL(finalBlob)
         this.uiManager.showLoading(false)
-        // Pass `this` (MediaRecorderManager instance) and `this.cameraManager`
         this.uiManager.displayPostRecordButtons(url, finalBlob, this, this.cameraManager)
-        this.resetRecordingVariables() // Call reset after processing and UI update
+        this.resetRecordingVariables() 
       }
 
       this.mediaRecorder.start()
@@ -81,7 +147,7 @@ export class MediaRecorderManager {
       console.error("Error starting recording:", error)
       this.uiManager.showLoading(false)
       alert(`Could not start recording: ${error.message}. Please ensure permissions are granted.`)
-      this.resetRecordingVariables(); // Clean up if start failed
+      this.resetRecordingVariables(); 
       return false
     }
   }
@@ -89,29 +155,62 @@ export class MediaRecorderManager {
   resetRecordingVariables() {
     console.log("Resetting recording variables");
     if (this.mediaRecorder && (this.mediaRecorder.state === "recording" || this.mediaRecorder.state === "paused")) {
-        this.mediaRecorder.stop(); // Ensure it's stopped if somehow reset is called early
+        this.mediaRecorder.stop(); 
     }
     this.mediaRecorder = null
     this.recordedChunks = []
 
     if (this.canvasStream) {
       this.canvasStream.getTracks().forEach((track) => {
-        track.stop()
+        // Only stop the track if it's the fallback one we cloned and added directly.
+        // The recorderAudioTrack from AudioDestinationNode should not be stopped here, as it's managed by AudioContext.
+        if (this.audioContext && this.recorderAudioTrack && track.id === this.recorderAudioTrack.id) {
+            // This is the track from AudioDestinationNode, do not stop it here.
+            // It will stop when AudioContext is closed or if it's a fallback.
+        } else if (track.id === this.recorderAudioTrack?.id) { // Fallback scenario where recorderAudioTrack was a direct clone
+             track.stop();
+        } else { // Other tracks (like video from canvas)
+             track.stop();
+        }
+        // A simpler approach if worried: remove the track from canvasStream but don't stop it if it's the audioDestination's track
+        // this.canvasStream.removeTrack(track); // Then decide to stop
       })
-      this.canvasStream = null
+      // More targeted track removal and stopping
+      const videoTrack = this.canvasStream.getVideoTracks()[0];
+      if(videoTrack) videoTrack.stop();
+
+      // If using AudioContext, the recorderAudioTrack is from audioDestinationNode and shouldn't be stopped here.
+      // If it was a fallback clone, it might need stopping.
+      if (this.recorderAudioTrack && (!this.audioContext || trackWasAFallbackClone)) {
+          // Check if recorderAudioTrack is still in canvasStream and if it was a fallback
+          const existingAudioTrackInCanvasStream = this.canvasStream.getAudioTracks().find(t => t.id === this.recorderAudioTrack.id);
+          if (existingAudioTrackInCanvasStream && !this.audioContext) { // Only stop if it was a fallback clone
+              this.recorderAudioTrack.stop();
+          }
+      }
+      this.canvasStream = null;
     }
-    // No need to manage this.audioVideoStream separately anymore
+
+    if (this.currentAudioSourceNode) {
+      this.currentAudioSourceNode.disconnect();
+      this.currentAudioSourceNode = null;
+    }
+     // The recorderAudioTrack (if from AudioContext) itself is not stopped here, it's persistent.
+     // If it was a fallback clone, it should have been stopped if it was added to canvasStream.
+     // For simplicity in reset, if not using AudioContext, ensure cloned track is stopped.
+    if (!this.audioContext && this.recorderAudioTrack && typeof this.recorderAudioTrack.stop === 'function') {
+        // If it was a fallback clone and might not have been in canvasStream to be stopped above
+        // This check is a bit defensive.
+    }
+    // recorderAudioTrack is reset to its initial state from constructor next time startRecording is called.
   }
 
   stopRecording() {
     if (this.mediaRecorder && this.mediaRecorder.state !== "inactive") {
-      this.mediaRecorder.stop() // This will trigger 'onstop'
+      this.mediaRecorder.stop() 
       console.log("Recording stopping...")
     } else {
        console.log("Recorder not active or already stopped.");
-       // If stopRecording is called when not recording (e.g. UI allows it), ensure UI resets.
-       // This case should be handled by UI logic primarily.
-       // this.resetRecordingVariables(); // Maybe not here, onstop is primary for reset
     }
   }
 
@@ -125,29 +224,36 @@ export class MediaRecorderManager {
       return
     }
 
-    if (!this.canvasStream) {
-      console.error("Canvas stream not available for audio track replacement.")
-      return
-    }
-
-    const newAudioTracks = newCameraManagerMediaStream.getAudioTracks()
-    if (newAudioTracks.length === 0) {
-      console.warn("New camera stream does not have an audio track. Audio might be lost or silent.")
-    }
-    const newAudioTrack = newAudioTracks.length > 0 ? newAudioTracks[0] : null
-
-    // Remove all existing audio tracks from the canvasStream
-    this.canvasStream.getAudioTracks().forEach(track => {
-      console.log("Removing old audio track from canvasStream:", track.label, track.id)
-      this.canvasStream.removeTrack(track)
-      track.stop() // Important: stop the old track to release resources
-    })
-
-    if (newAudioTrack) {
-      console.log("Adding new audio track to canvasStream:", newAudioTrack.label, newAudioTrack.id)
-      this.canvasStream.addTrack(newAudioTrack.clone()) // Clone to be safe
+    if (this.audioContext && this.audioDestinationNode) {
+        console.log("Switching audio source via AudioContext.");
+        this._connectAudioSource(newCameraManagerMediaStream);
     } else {
-      console.warn("No new audio track to add. Recording may continue with no audio on this segment.")
+        // Fallback: direct track replacement in canvasStream (less robust, might cause recorder to stop)
+        console.warn("AudioContext not available, attempting direct track replacement for MediaRecorder.");
+        if (!this.canvasStream) {
+            console.error("Canvas stream not available for audio track replacement (fallback).")
+            return;
+        }
+        const newAudioTracks = newCameraManagerMediaStream.getAudioTracks();
+        if (newAudioTracks.length === 0) {
+            console.warn("New camera stream has no audio track (fallback).");
+        }
+        const newAudioTrack = newAudioTracks.length > 0 ? newAudioTracks[0] : null;
+
+        this.canvasStream.getAudioTracks().forEach(track => {
+            console.log("Removing old audio track from canvasStream (fallback):", track.label, track.id);
+            this.canvasStream.removeTrack(track);
+            track.stop(); // Stop the old cloned track
+        });
+
+        if (newAudioTrack) {
+            const clonedNewTrack = newAudioTrack.clone();
+            console.log("Adding new cloned audio track to canvasStream (fallback):", clonedNewTrack.label, clonedNewTrack.id);
+            this.canvasStream.addTrack(clonedNewTrack);
+            this.recorderAudioTrack = clonedNewTrack; // Update reference if using fallback
+        } else {
+             this.recorderAudioTrack = null;
+        }
     }
     console.log("Audio track switch attempt for MediaRecorder completed.")
   }

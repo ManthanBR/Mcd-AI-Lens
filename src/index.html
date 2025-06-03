@@ -9,31 +9,40 @@
   </head>
 
   <body>
-    <canvas id="canvas"></canvas>
-    <div id="switch-cam">
-      <button id="switch-button" class="button-class"></button>
-    </div>
-    <div class="poweredbysnap-logo">
-      <img id="image" src="../assets/Powered_bysnap.png" alt="Powered by Snap" />
-    </div>
-    <div id="controls">
-      <img id="outline" src="../assets/RecordOutline.png" />
-      <button id="record-button" class="button-class"></button>
+    <div id="start-screen">
+      <h1>Welcome!</h1>
+      <p>This experience may use motion sensors for enhanced interaction. Please grant permission to continue.</p>
+      <button id="start-button">Start Experience</button>
+      <p id="permission-status" style="display:none; color: red; margin-top: 15px;"></p>
     </div>
 
-    <div id="action-buttons" style="display: none">
-      <button id="share-button" class="button-class">
-        <img id="shareImg" src="../assets/ShareButton.png" alt="share" />
-      </button>
-      <button id="download-button" class="button-class">
-        <img id="downloadImg" src="../assets/DownloadButton.png" alt="download" />
-      </button>
-    </div>
+    <div id="main-app-container" style="display: none;">
+      <canvas id="canvas"></canvas>
+      <div id="switch-cam">
+        <button id="switch-button" class="button-class"></button>
+      </div>
+      <div class="poweredbysnap-logo">
+        <img id="image" src="../assets/Powered_bysnap.png" alt="Powered by Snap" />
+      </div>
+      <div id="controls">
+        <img id="outline" src="../assets/RecordOutline.png" />
+        <button id="record-button" class="button-class"></button>
+      </div>
 
-    <div id="back-button-container" style="display: none">
-      <button id="back-button" class="button-class">
-        <img id="backImg" src="../assets/BackButton.png" alt="back" />
-      </button>
+      <div id="action-buttons" style="display: none">
+        <button id="share-button" class="button-class">
+          <img id="shareImg" src="../assets/ShareButton.png" alt="share" />
+        </button>
+        <button id="download-button" class="button-class">
+          <img id="downloadImg" src="../assets/DownloadButton.png" alt="download" />
+        </button>
+      </div>
+
+      <div id="back-button-container" style="display: none">
+        <button id="back-button" class="button-class">
+          <img id="backImg" src="../assets/BackButton.png" alt="back" />
+        </button>
+      </div>
     </div>
 
     <div id="loading">

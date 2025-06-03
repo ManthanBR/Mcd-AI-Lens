@@ -25,6 +25,51 @@ body {
   /* border: 3px solid red; */
 }
 
+/* Start Screen Styles */
+#start-screen {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgb(26, 26, 26); /* Match body background */
+  color: white;
+  display: flex; /* Changed to flex for initial display */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  z-index: 2000; /* Above everything else */
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#start-screen h1 {
+  font-size: 2.5em;
+  margin-bottom: 20px;
+}
+
+#start-screen p {
+  font-size: 1.1em;
+  margin-bottom: 30px;
+  max-width: 80%;
+  line-height: 1.6;
+}
+
+#start-screen button {
+  padding: 15px 30px;
+  font-size: 1.2em;
+  cursor: pointer;
+  background-color: #007bff; /* A standard blue, adjust as needed */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.2s ease;
+}
+
+#start-screen button:hover {
+  background-color: #0056b3;
+}
 /* ... rest of your CSS ... */
 
 .poweredbysnap-logo {
