@@ -4,6 +4,7 @@ html {
   width: 100%;
   height: 100%;
   overflow: hidden; /* Prevent scrollbars on the html element */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
 }
 
 body {
@@ -13,6 +14,7 @@ body {
   height: 100%; /* Make body fill html height */
   overflow: hidden; /* This was already correctly set */
   background-color: rgb(26, 26, 26);
+  color: #f0f0f0; /* Lighter default text color for better readability on dark bg */
 }
 
 #canvas {
@@ -32,9 +34,9 @@ body {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgb(26, 26, 26); /* Match body background */
-  color: white;
-  display: flex; /* Changed to flex for initial display */
+  background-color: #1a1a1a; /* Slightly different dark shade */
+  color: #e0e0e0;
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
@@ -44,32 +46,75 @@ body {
   box-sizing: border-box;
 }
 
+#logo-placeholder {
+  max-width: 150px; /* Adjust as needed */
+  max-height: 150px; /* Adjust as needed */
+  margin-bottom: 30px; /* Space between logo and title */
+  /* For a circular placeholder if logo is square/round */
+  /* border-radius: 50%;
+     background-color: #333;
+     border: 2px solid #444;
+     object-fit: cover; */ /* If you want the image to cover the area */
+}
+
+
 #start-screen h1 {
-  font-size: 2.5em;
-  margin-bottom: 20px;
+  font-size: 2.8em; /* Slightly larger */
+  margin-bottom: 15px;
+  font-weight: 600;
+  color: #ffffff;
 }
 
 #start-screen p {
-  font-size: 1.1em;
-  margin-bottom: 30px;
-  max-width: 80%;
-  line-height: 1.6;
+  font-size: 1.15em; /* Slightly larger */
+  margin-bottom: 35px;
+  max-width: 85%;
+  line-height: 1.7;
+  color: #b0b0b0; /* Softer color for paragraph */
 }
 
 #start-screen button {
-  padding: 15px 30px;
-  font-size: 1.2em;
+  padding: 14px 35px; /* Adjusted padding */
+  font-size: 1.1em; /* Adjusted font size */
+  font-weight: 500;
   cursor: pointer;
-  background-color: #007bff; /* A standard blue, adjust as needed */
+  background: linear-gradient(145deg, #007bff, #0056b3); /* Gradient background */
   color: white;
   border: none;
-  border-radius: 5px;
-  transition: background-color 0.2s ease;
+  border-radius: 25px; /* More rounded (pill shape) */
+  transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
+  box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); /* Softer shadow related to button color */
+  outline: none; /* Remove default browser outline */
 }
 
 #start-screen button:hover {
-  background-color: #0056b3;
+  background: linear-gradient(145deg, #0069d9, #004085); /* Darker gradient on hover */
+  box-shadow: 0 6px 12px rgba(0, 123, 255, 0.4);
+  transform: translateY(-2px); /* Slight lift on hover */
 }
+
+#start-screen button:active {
+  transform: translateY(0px); /* Press down effect */
+  box-shadow: 0 2px 5px rgba(0, 123, 255, 0.3);
+}
+
+#start-screen button:disabled {
+  background: #555; /* Darker grey for disabled */
+  color: #999;
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+}
+
+#permission-status {
+  margin-top: 20px;
+  font-size: 0.95em;
+  color: #ff4d4d; /* Brighter red for errors */
+  font-weight: 500;
+  max-width: 90%;
+}
+
+
 /* ... rest of your CSS ... */
 
 .poweredbysnap-logo {
@@ -276,8 +321,8 @@ body {
   z-index: 1001; /* Above everything else */
   display: none; /* Hidden by default */
   /* Added for better visibility if it has no background */
-  /* background-color: rgba(0,0,0,0.1); 
-     padding: 20px; 
+  /* background-color: rgba(0,0,0,0.1);
+     padding: 20px;
      border-radius: 10px; */
 }
 
