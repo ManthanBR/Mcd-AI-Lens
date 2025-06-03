@@ -35,12 +35,12 @@ async function requestMotionPermissions() {
       const permissionState = await DeviceMotionEvent.requestPermission();
       if (permissionState === 'granted') {
         if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-          try { 
-            await DeviceOrientationEvent.requestPermission(); 
+          try {
+            await DeviceOrientationEvent.requestPermission();
             console.log("Orientation permission granted on iPhone.");
-          } 
-          catch (orientError) { 
-            console.warn('Could not get orientation permission on iPhone, but motion was granted:', orientError); 
+          }
+          catch (orientError) {
+            console.warn('Could not get orientation permission on iPhone, but motion was granted:', orientError);
           }
         }
         console.log("Motion permission granted on iPhone.");
@@ -66,19 +66,18 @@ async function requestMotionPermissions() {
     } else {
         console.log('iPhone detected, but DeviceMotionEvent.requestPermission not found (older iOS).');
     }
-    return true; 
+    return true;
   }
 }
 
 function showStartScreenLoading(show) {
     if (show) {
         if(startScreenInteractive) startScreenInteractive.style.display = 'none';
-        if(loadingElementInsideStartScreen) loadingElementInsideStartScreen.style.display = 'flex';
+        if(loadingElementInsideStartScreen) loadingElementInsideStartScreen.style.display = 'flex'; // Ensure it's flex for the new loader
         if(permissionStatusElem) permissionStatusElem.style.display = 'none';
     } else {
         if(loadingElementInsideStartScreen) loadingElementInsideStartScreen.style.display = 'none';
         if(startScreenInteractive) startScreenInteractive.style.display = 'flex';
-        // Error messages might be shown by other functions, so don't hide permissionStatusElem here by default
     }
 }
 
@@ -122,18 +121,17 @@ async function initializeAppAndCameraKit() {
       initialSource.setTransform(Transform2D.MirrorX);
     }
     await session.setFPSLimit(Settings.camera.fps);
-    
+
 
     const lens = await cameraKit.lensRepository.loadLens(lensID, groupID);
     await session.applyLens(lens);
-    await session.play(); // Play after lens is applied
+    await session.play();
 
     if(startScreen) startScreen.style.display = 'none';
     if(mainAppContainer) mainAppContainer.style.display = 'block';
-    
+
     uiManager.updateRenderSize(cameraManager.getSource(), liveRenderTarget);
 
-    // Setup event listeners for the main app UI
     if (uiManager.recordButton) {
         uiManager.recordButton.addEventListener("click", async () => {
             if (uiManager.recordPressedCount % 2 === 0) {
@@ -148,14 +146,27 @@ async function initializeAppAndCameraKit() {
     }
     if (uiManager.switchButton) {
         uiManager.switchButton.addEventListener("click", async () => {
+            // Hide the switch button immediately
+            if (uiManager.switchButton) uiManager.switchButton.style.display = 'none';
+
             try {
                 const newSource = await cameraManager.updateCamera(session);
                 uiManager.updateRenderSize(newSource, liveRenderTarget);
                 if (mediaRecorder.isRecording()) {
                     mediaRecorder.switchCameraAudio(cameraManager.mediaStream);
                 }
+                // Re-show the switch button if successful and not in post-record state
+                // Check if action buttons are hidden, meaning we are in live view mode
+                if (uiManager.actionButton && uiManager.actionButton.style.display === 'none') {
+                   if (uiManager.switchButton) uiManager.switchButton.style.display = 'block';
+                }
+
             } catch (error) {
                 console.error("Error switching camera:", error);
+                // Re-show the switch button on error too, if appropriate
+                 if (uiManager.actionButton && uiManager.actionButton.style.display === 'none') {
+                   if (uiManager.switchButton) uiManager.switchButton.style.display = 'block';
+                }
             }
         });
     }
@@ -188,10 +199,9 @@ if (startButton) {
         showStartScreenLoading(true);
         await initializeAppAndCameraKit();
       } else {
-        // Error message is already displayed by requestMotionPermissions
         startButton.disabled = false;
         startButton.textContent = 'Grant Permissions & Start';
-        showStartScreenLoading(false); // Ensure interactive elements are shown
+        showStartScreenLoading(false);
       }
     });
 } else {
