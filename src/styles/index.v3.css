@@ -47,9 +47,9 @@ body {
 }
 
 #logo-placeholder {
-  max-width: 150px; /* Adjust as needed */
-  max-height: 150px; /* Adjust as needed */
-  margin-bottom: 30px; /* Space between logo and title */
+  max-width: 180px; /* Increased from 150px */
+  max-height: 180px; /* Increased from 150px */
+  margin-bottom: 35px; /* Increased from 30px for a bit more space */
   /* For a circular placeholder if logo is square/round */
   /* border-radius: 50%;
      background-color: #333;
@@ -59,29 +59,29 @@ body {
 
 
 #start-screen h1 {
-  font-size: 2.8em; /* Slightly larger */
-  margin-bottom: 15px;
+  font-size: 3.2em; /* Increased from 2.8em */
+  margin-bottom: 20px; /* Increased from 15px */
   font-weight: 600;
   color: #ffffff;
 }
 
 #start-screen p {
-  font-size: 1.15em; /* Slightly larger */
-  margin-bottom: 35px;
+  font-size: 1.25em; /* Increased from 1.15em */
+  margin-bottom: 40px; /* Increased from 35px */
   max-width: 85%;
   line-height: 1.7;
   color: #b0b0b0; /* Softer color for paragraph */
 }
 
 #start-screen button {
-  padding: 14px 35px; /* Adjusted padding */
-  font-size: 1.1em; /* Adjusted font size */
+  padding: 16px 40px; /* Increased padding from 14px 35px */
+  font-size: 1.2em; /* Increased font size from 1.1em */
   font-weight: 500;
   cursor: pointer;
   background: linear-gradient(145deg, #007bff, #0056b3); /* Gradient background */
   color: white;
   border: none;
-  border-radius: 25px; /* More rounded (pill shape) */
+  border-radius: 28px; /* Slightly increased for proportion from 25px */
   transition: background 0.3s ease, transform 0.15s ease, box-shadow 0.3s ease;
   box-shadow: 0 4px 10px rgba(0, 123, 255, 0.3); /* Softer shadow related to button color */
   outline: none; /* Remove default browser outline */
@@ -107,8 +107,8 @@ body {
 }
 
 #permission-status {
-  margin-top: 20px;
-  font-size: 0.95em;
+  margin-top: 25px; /* Increased from 20px */
+  font-size: 1em; /* Increased from 0.95em */
   color: #ff4d4d; /* Brighter red for errors */
   font-weight: 500;
   max-width: 90%;
