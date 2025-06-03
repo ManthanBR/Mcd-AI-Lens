@@ -11,9 +11,14 @@
   <body>
     <div id="start-screen">
       <div id="start-screen-content">
-        <img src="../assets/logo.png" alt="App Logo" id="logo-placeholder" />
-        <h1>GET READY FOR YOUR<br/>RANVEER SINGH MEAL!</h1>
-        <button id="start-button">LET'S GO!</button>
+        <div id="start-screen-interactive">
+          <img src="../assets/logo.png" alt="App Logo" id="logo-placeholder" />
+          <h1>GET READY FOR YOUR<br/>RANVEER SINGH MEAL!</h1>
+          <button id="start-button">LET'S GO!</button>
+        </div>
+        <div id="loading" style="display: none;">
+          <img id="loading-icon" src="../assets/LoadingIcon.png" alt="loading" />
+        </div>
         <p id="permission-status" style="display:none;"></p>
       </div>
     </div>
@@ -45,10 +50,6 @@
           <img id="backImg" src="../assets/BackButton.png" alt="back" />
         </button>
       </div>
-    </div>
-
-    <div id="loading">
-      <img id="loading-icon" src="../assets/LoadingIcon.png" alt="loading" />
     </div>
 
     <script>

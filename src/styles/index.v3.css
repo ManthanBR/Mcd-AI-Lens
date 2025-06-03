@@ -58,12 +58,20 @@ body {
   position: relative;
 }
 
+/* Wrapper for interactive elements on start screen */
+#start-screen-interactive {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+}
+
 #logo-placeholder {
   max-width: 150px;
   max-height: 150px;
   margin-top: 5vh;
   margin-bottom: 2vh;
-  /* Optional: if your logo is simple, a subtle drop shadow can help */
   /* filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.15)); */
 }
 
@@ -75,19 +83,18 @@ body {
   color: #DB0007;
   line-height: 1.1;
   text-transform: uppercase;
-  /* Text Pop Effect for H1 */
   text-shadow:
-    1px 1px 0px #FFF352, /* Lighter yellow highlight (top-left) */
-    -1px -1px 0px #b00006, /* Darker red shadow (bottom-right) */
-    2px 2px 3px rgba(0,0,0,0.2); /* Softer general drop shadow for depth */
+    1px 1px 0px #FFF352,
+    -1px -1px 0px #b00006,
+    2px 2px 3px rgba(0,0,0,0.2);
 }
 
-#start-screen button {
+#start-screen button#start-button { /* More specific selector */
   padding: 15px 30px;
   font-size: clamp(1.4em, 5vw, 1.8em);
   font-weight: 900;
-  color: #FFC72C; /* Yellow text */
-  background-color: #DB0007; /* Red background */
+  color: #FFC72C;
+  background-color: #DB0007;
   border: 3px solid #FFC72C;
   border-radius: 50px;
   cursor: pointer;
@@ -99,14 +106,13 @@ body {
   margin-top: 0;
   margin-bottom: 4vh;
   box-shadow: 0 4px 8px rgba(0,0,0,0.25);
-  /* Text Pop Effect for Button Text */
   text-shadow:
-    1px 1px 0px #c50007, /* Darker red highlight (for yellow text on red bg) */
-    -1px -1px 0px rgba(255,255,255,0.15), /* Subtle lighter shadow */
-     1px 1px 2px rgba(0,0,0,0.3); /* General drop shadow */
+    1px 1px 0px #c50007,
+    -1px -1px 0px rgba(255,255,255,0.15),
+     1px 1px 2px rgba(0,0,0,0.3);
 }
 
-#start-screen button:hover {
+#start-screen button#start-button:hover {
   background-color: #c50007;
   color: #fff352;
   border-color: #fff352;
@@ -114,14 +120,14 @@ body {
   box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
-#start-screen button:active {
+#start-screen button#start-button:active {
   transform: translateY(1px);
   background-color: #b00006;
   color: #FFC72C;
   border-color: #FFC72C;
 }
 
-#start-screen button:disabled {
+#start-screen button#start-button:disabled {
   background-color: #a30005;
   color: #d4a200;
   border-color: #d4a200;
@@ -131,23 +137,50 @@ body {
   text-shadow: none;
 }
 
+/* Loading icon styles when inside start-screen-content */
+#start-screen-content #loading {
+  /* display: none; is set inline in HTML initially */
+  /* When shown, it will be a flex item and centered by #start-screen-content's align-items & justify-content */
+  /* Ensure it has some space if other elements like permission status are also visible */
+  margin: 20px 0;
+}
+
+#start-screen-content #loading-icon {
+  height: 100px;
+  width: 100px;
+  animation: spin 2s linear infinite;
+  display: block;
+  /* Make loading icon red to contrast with yellow background */
+  filter: invert(17%) sepia(89%) saturate(4799%) hue-rotate(350deg) brightness(90%) contrast(110%);
+}
+
 #permission-status {
-  margin-top: auto;
+  /* margin-top: auto; Pushes to the bottom. If loading is visible, this might fight for space or be pushed too far. */
+  /* Better to let the flex container center it along with loading if both are shown (e.g. on error) */
   padding-bottom: 2vh;
   font-size: clamp(0.9em, 2.5vw, 1.1em);
-  color: #DB0007; /* Red error text */
+  color: #DB0007;
   font-weight: 700;
   max-width: 90%;
   line-height: 1.3;
-  /* Text Pop Effect for Permission Status */
   text-shadow:
-    1px 1px 0px #FFF352, /* Lighter yellow highlight (top-left) */
-    -1px -1px 0px #b00006, /* Darker red shadow (bottom-right) */
-    1px 1px 2px rgba(0,0,0,0.15); /* Softer general drop shadow */
+    1px 1px 0px #FFF352,
+    -1px -1px 0px #b00006,
+    1px 1px 2px rgba(0,0,0,0.15);
+}
+
+/* Keyframes for the rotation */
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 
-/* --- REST OF YOUR EXISTING CSS (Unchanged from previous version) --- */
+/* --- REST OF YOUR EXISTING CSS --- */
 
 .poweredbysnap-logo {
   width: auto;
@@ -333,31 +366,6 @@ body {
 
 #switch-button:active {
   transform: translate(5%, 5%);
-}
-
-#loading {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1001;
-  display: none;
-}
-
-#loading-icon {
-  height: 100px;
-  width: 100px;
-  animation: spin 2s linear infinite;
-  display: block;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
 }
 
 /* Desktop-specific styles */
