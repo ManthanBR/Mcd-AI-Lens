@@ -13,7 +13,8 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  background-color: #000000; /* Body background is now black */
+  /* Body background is now black, the frame will be placed on top by #start-screen */
+  background-color: #000000;
 }
 
 #canvas {
@@ -24,93 +25,99 @@ body {
   z-index: 1;
 }
 
-/* Start Screen Styles - Frame Theme */
+/* Start Screen Styles - Yellow Background, Red Text Theme */
 #start-screen {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  display: flex; /* To center the inner content box */
+  display: flex;
   justify-content: center;
   align-items: center;
-  padding: 25px; /* Space for the outer red part of the frame and rounding */
+  padding: 20px; /* Space for the outer frame and rounding, can be yellow */
   box-sizing: border-box;
-  background-color: #DB0007; /* Outer frame color: McDonald's Red */
-  border-radius: 45px; /* Rounded corners for the outermost frame */
+  background-color: #FFC72C; /* Outer frame color: McDonald's Yellow */
+  border-radius: 40px; /* Rounded corners for the outermost frame */
   z-index: 2000;
 }
 
 #start-screen-content {
   width: 100%;
   height: 100%;
-  background-color: #000000; /* Inner content area background: Black */
-  color: #FFC72C; /* McDonald's Yellow for text */
+  background-color: #FFC72C; /* Inner content area background: McDonald's Yellow */
+  color: #DB0007; /* McDonald's Red for text */
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: center; /* Vertically centers content */
   align-items: center;
   text-align: center;
-  padding: 20px; /* Padding inside the black content area */
+  padding: 25px; /* Padding inside the yellow content area */
   box-sizing: border-box;
-  border: 10px solid #FFC72C; /* Inner frame color: McDonald's Yellow */
-  border-radius: 25px; /* Slightly less rounded corners for the inner yellow frame part */
+  border: 10px solid #DB0007; /* Inner frame color: McDonald's Red */
+  border-radius: 25px; /* Slightly less rounded corners for the inner red frame part */
   overflow-y: auto;
 }
 
 #logo-placeholder {
-  max-width: 180px; /* Adjust as needed */
-  max-height: 180px;
-  margin-bottom: 20px;
+  max-width: 170px; /* Slightly smaller to accommodate button move */
+  max-height: 170px;
+  margin-bottom: 15px; /* Reduced margin */
+  /* If your logo is an SVG and needs specific coloring:
+     filter: invert(15%) sepia(90%) saturate(5000%) hue-rotate(350deg) brightness(90%) contrast(110%);
+     This is an EXAMPLE filter to make something red-dish. You'll need to adjust.
+  */
 }
 
 #start-screen h1 {
-  font-size: 2.8em; /* Adjusted for new layout */
-  margin-bottom: 30px;
+  font-size: 3em; /* Adjusted for new layout */
+  margin-top: 0; /* Reset top margin */
+  margin-bottom: 20px; /* Space before button */
   font-weight: 900;
-  color: #FFC72C;
-  line-height: 1.2;
+  color: #DB0007;
+  line-height: 1.15;
   text-transform: uppercase;
-  text-shadow: 2px 2px 0px rgba(0,0,0,0.2); /* Simpler shadow */
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.3); /* Light shadow for red on yellow */
 }
 
-/* The descriptive paragraph <p> is removed from HTML */
-
 #start-screen button {
-  padding: 15px 30px; /* Adjusted padding */
-  font-size: 1.5em;   /* Adjusted font size */
+  padding: 18px 35px; /* Bigger padding */
+  font-size: 1.8em;   /* Even bigger button text */
   font-weight: 900;
-  color: #FFC72C;
-  background-color: #000000; /* Black background for button to match content area */
-  border: 3px solid #FFC72C; /* Yellow border */
+  color: #FFC72C; /* Yellow text */
+  background-color: #DB0007; /* Red background for button */
+  border: 3px solid #FFC72C; /* Yellow border to make it pop */
   border-radius: 50px;      /* Pill shape */
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
   text-transform: uppercase;
-  min-width: auto; /* Allow button to size to content + padding */
-  width: fit-content; /* Modern way to size to content */
-  max-width: 80%;  /* Prevent it from being too wide */
-  box-shadow: 0 3px 6px rgba(255,199,44,0.3); /* Yellowish glow */
+  min-width: auto;
+  width: fit-content;
+  max-width: 85%;
+  margin-top: 25px; /* MOVED BUTTON DOWN */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   text-shadow: 1px 1px 0px rgba(0,0,0,0.2);
 }
 
 #start-screen button:hover {
-  background-color: #FFC72C; /* Yellow background on hover */
-  color: #000000;           /* Black text on hover */
-  border-color: #FFC72C;
+  background-color: #c50007; /* Darker red */
+  color: #fff352; /* Brighter yellow text */
+  border-color: #fff352; /* Brighter yellow border */
   transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.3);
 }
 
 #start-screen button:active {
   transform: translateY(1px);
-  background-color: #e6b800; /* Darker yellow when pressed */
-  color: #000000;
+  background-color: #b00006;
+  color: #FFC72C;
+  border-color: #FFC72C;
 }
 
 #start-screen button:disabled {
-  background-color: #333;
-  color: #888;
-  border-color: #555;
+  background-color: #a30005; /* Dull red */
+  color: #d4a200; /* Dull yellow */
+  border-color: #d4a200; /* Dull yellow */
   cursor: not-allowed;
   box-shadow: none;
   transform: none;
@@ -118,13 +125,13 @@ body {
 }
 
 #permission-status {
-  margin-top: 20px;
+  margin-top: 20px; /* Space above permission status */
   font-size: 1.1em;
-  color: #FFC72C;
+  color: #DB0007; /* Red error text */
   font-weight: 700;
   max-width: 90%;
   line-height: 1.3;
-  text-shadow: 1px 1px 1px rgba(0,0,0,0.5);
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.3); /* Light shadow for readability */
 }
 
 
