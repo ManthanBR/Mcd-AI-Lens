@@ -71,14 +71,14 @@ body {
 #logo-placeholder {
   max-width: 150px;
   max-height: 150px;
-  margin-top: 5vh;
-  margin-bottom: 2vh;
+  margin-top: 2vh; /* Adjusted */
+  margin-bottom: 1.5vh; /* Adjusted */
 }
 
 #start-screen h1 {
   font-size: clamp(2.2em, 7vw, 3.2em);
   margin-top: 0;
-  margin-bottom: 3vh;
+  margin-bottom: 2vh; /* Adjusted */
   font-weight: 900;
   color: #DB0007;
   line-height: 1.1;
@@ -90,8 +90,8 @@ body {
 }
 
 #start-screen button#start-button {
-  padding: 30px 50px;
-  font-size: clamp(2.0em, 8vw, 3.0em);
+  padding: 25px 55px; /* Further increased padding */
+  font-size: clamp(2.0em, 8vw, 2.8em); /* Further increased font size */
   font-weight: 900;
   color: #FFC72C;
   background-color: #DB0007;
@@ -104,7 +104,7 @@ body {
   width: fit-content;
   max-width: 80%;
   margin-top: 0;
-  margin-bottom: 4vh;
+  margin-bottom: 2.5vh; /* Adjusted */
   box-shadow: 0 4px 8px rgba(0,0,0,0.25);
   text-shadow:
     1px 1px 0px #c50007,
