@@ -90,7 +90,7 @@ body {
 }
 
 #start-screen button#start-button {
-  padding: 30px 70px; /* Further increased padding */
+  padding: 35px 75px; /* Further increased padding */
   font-size: clamp(2.4em, 11vw, 3.5em); /* Further increased font size */
   font-weight: 900;
   color: #FFC72C;
