@@ -31,24 +31,28 @@ export const Settings = {
 
   // Recording settings
   recording: {
-    mimeType: "video/mp4",
+    mimeType: "video/mp4", // This is the FINAL output format after FFmpeg
+    audioMimeType: "audio/webm; codecs=opus", // Recommended for intermediate audio recording
+    videoMimeTypeForCanvas: "video/webm", // Using webm for video for consistency
     fps: 60,
     outputFileName: "RanveerSinghMeal.mp4",
   },
 
   // FFmpeg settings
   ffmpeg: {
-    baseURL: "/ffmpeg",
+    baseURL: "/ffmpeg", // Make sure this path is correct for your server setup
     coreURL: "ffmpeg-core.js",
     wasmURL: "ffmpeg-core.wasm",
+    // outputOptions are less relevant for direct combine, but kept for other uses
     outputOptions: ["-movflags", "faststart", "-c", "copy"],
+    combineOutputOptions: ["-movflags", "faststart"], // Options for the final combined output
   },
 
   // UI settings
   ui: {
     recordButton: {
-      startImage: "./assets/RecordButton.png",
-      stopImage: "./assets/RecordStop.png",
+      startImage: "./assets/RecordButton.png", // Ensure these paths are correct
+      stopImage: "./assets/RecordStop.png",   // Ensure these paths are correct
     },
     assets: {
       poweredBySnap: "./assets/Powered_bysnap.png",
@@ -56,7 +60,7 @@ export const Settings = {
       shareButton: "./assets/ShareButton.png",
       downloadButton: "./assets/DownloadButton.png",
       backButton: "./assets/BackButton.png",
-      loadingIcon: "./assets/LoadingIcon.png",
+      loadingIcon: "./assets/LoadingIcon.png", // Or use a CSS loader
     },
   },
 }
