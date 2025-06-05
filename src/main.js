@@ -112,7 +112,7 @@ async function initializeAppAndCameraKit() {
     const mediaStream = await cameraManager.initializeCamera();
     const initialSource = createMediaStreamSource(mediaStream, {
       cameraType: cameraManager.isBackFacing ? "environment" : "user",
-      disableSourceAudio: false,
+      disableSourceAudio: false, // Important: Camera Kit source should not disable audio on the base MediaStream
     });
     cameraManager.currentSource = initialSource;
     await session.setSource(initialSource);
@@ -146,7 +146,6 @@ async function initializeAppAndCameraKit() {
     }
     if (uiManager.switchButton) {
         uiManager.switchButton.addEventListener("click", async () => {
-            // Hide the switch button immediately
             if (uiManager.switchButton) uiManager.switchButton.style.display = 'none';
 
             try {
@@ -155,15 +154,13 @@ async function initializeAppAndCameraKit() {
                 if (mediaRecorder.isRecording()) {
                     mediaRecorder.switchCameraAudio(cameraManager.mediaStream);
                 }
-                // Re-show the switch button if successful and not in post-record state
-                // Check if action buttons are hidden, meaning we are in live view mode
+                
                 if (uiManager.actionButton && uiManager.actionButton.style.display === 'none') {
                    if (uiManager.switchButton) uiManager.switchButton.style.display = 'block';
                 }
 
             } catch (error) {
                 console.error("Error switching camera:", error);
-                // Re-show the switch button on error too, if appropriate
                  if (uiManager.actionButton && uiManager.actionButton.style.display === 'none') {
                    if (uiManager.switchButton) uiManager.switchButton.style.display = 'block';
                 }
